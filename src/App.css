@@ -36,3 +36,11 @@
     transform: rotate(360deg);
   }
 }
+
+
+.card.bg-primary.mainContent {
+  border-radius: 16px;
+  overflow: inherit;
+  margin: 25px;
+  background:  linear-gradient(to right,lightblue,white);
+}

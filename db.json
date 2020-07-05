@@ -1,0 +1,27 @@
+{
+    "posts": {
+        "stockItems":[{
+            "itemNo": 1,
+            "itemName": "Rice",
+            "Quantity_measure": "Kg",
+            "price": 10
+        }],
+        "InStore": [{
+            "itemNo":1,
+            "itemName": "Rice",
+            "currentQty": "25Kg",
+            "last_filled_on": "05/07/2020"
+
+        }],
+        "service": [{
+            "date":"05/07/2020",
+            "itemsServiced":[{"itemNo":1,
+                "itemName": "Rice",
+                "servicedQty":"2Kg",
+                "QtyInStoreAfterServiced":"23Kg",
+                "QtyInStoreBeforeServiced":"25Kg"}]
+        }]
+
+
+    }
+  }

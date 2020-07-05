@@ -31,6 +31,7 @@ a:focus {
     border-radius: 0;
     margin-bottom: 40px;
     box-shadow: 1px 1px 3px rgba(0, 0, 0, 0.1);
+    width: 100%;
 }
 
 .navbar-btn {
@@ -62,7 +63,8 @@ a:focus {
     left: 0;
     height: 100vh;
     z-index: 999;
-    background: #7386D5;
+    /* background: #7386D5; */
+    background: #17a2b8;
     color: #fff;
     transition: all 0.3s;
 }
@@ -160,6 +162,10 @@ a.article:hover {
 
 #content.active {
     width: 100%;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
 }
 
 /* ---------------------------------------------------
@@ -178,8 +184,19 @@ a.article:hover {
     }
     #content.active {
         width: calc(100% - 250px);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
     }
     #sidebarCollapse span {
         display: none;
     }
+}
+
+#content.active {
+    width: 100%;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
 }
