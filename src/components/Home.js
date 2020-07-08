@@ -1,18 +1,39 @@
     import React, {useEffect, useState} from 'react';
     import Menu from './Menu';
     import StockInfo from './StockTable';
+    import StockManagement from './StockManagement';
+    import axios from 'axios';
+import Store from './store';
     const Home = ()=>{
         const navbarElementsFromHome = ["Stock Table", "Stock Management", "Store" , "About"];
-        const[componentName,setComponentName]=useState("Home");
+        const[componentName,setComponentName]=useState("Store");
         const[component,setComponent] =  useState(null);
         const [collapsed, setCollapsed] = useState(true);
+        const[stockInfodata,setStockInfodata] =  useState([]);
+        
+        useEffect(() => {
+            let res;
+            if(stockInfodata.length==0){
+            axios.defaults.baseURL = 'http://localhost:5000';
+            axios.get('/currentStockTable')
+            .then((res)=>{
+                console.log("response from stock table",res.data);
+                // res=res.data;
+                setStockInfodata(res.data);
+                // console.log("stockInfoData={data}   ",res);
+            })
+            .catch((err)=>{
+                console.log("error",err);
+            })
+            
+        }
+          }, [])
+        
 
         const getContentFromHome =()=>{
             return(
             <div className="card bg-primary mainContent">
-            <div>
             <h1>Home</h1>
-                </div>
                 </div>
                 ) 
         }
@@ -29,20 +50,22 @@
         useEffect(()=>{
             switch (componentName) {
                 case 'Stock Table':
-                    setComponent(<StockInfo />)
+                    setComponent(<StockInfo stockInfoData={stockInfodata}/>)
+                    // stockInfoData={data}
                     break;
                 case 'Stock Management':
-                    setComponent(<StockInfo />)
+                    setComponent(<StockManagement />)
                     break;
                 case 'Store':
-                    setComponent(<StockInfo />)
+                    if(stockInfodata.length!=0)
+                    setComponent(<Store stockInfoData={stockInfodata}/>)
                     break;
                 default:
                         setComponent(null);
                         getContentFromHome();
                     break;
             }
-        },[componentName])
+        },[componentName,stockInfodata])
 
 
         let content = (<div className="wrapper">

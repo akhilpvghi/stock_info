@@ -2,8 +2,12 @@
 import React, { useEffect, useState } from 'react';
 import '../styles/menu.css';
 import styled from 'styled-components'
-import { useTable, useBlockLayout, useResizeColumns } from 'react-table'
-import axios from 'axios';
+import { useTable, useBlockLayout, useResizeColumns, usePagination } from 'react-table'
+// import Papa from 'papaparse'
+import Pagination from './helper/pagination';
+// import readXlsxFile from 'read-excel-file'
+// import csvtojson  from 'csvtojson';
+// import * as fs from 'fs';
 
 
 const Styles = styled.div`
@@ -58,7 +62,7 @@ const Styles = styled.div`
       }
     }
   }
-`
+  `
 
 function Table({ columns, data }) {
     // Use the state and functions returned from useTable to build your UI
@@ -70,19 +74,33 @@ function Table({ columns, data }) {
         maxWidth: 300,
       }),
       []
-    )
-  
+      )
+      
+
+
+
     const {
       getTableProps,
       getTableBodyProps,
       headerGroups,
       rows,
       prepareRow,
+    canPreviousPage,
+    canNextPage,
+    pageOptions,
+    pageCount,
+    gotoPage,
+    nextPage,
+    previousPage,
+    setPageSize,
+    state: { pageIndex, pageSize }
     } = useTable({
       columns,
       data,
-      defaultColumn
+      defaultColumn,
+      initialState: { pageIndex: 0 }
     },
+    usePagination,
       useBlockLayout,
       useResizeColumns)
   
@@ -118,56 +136,145 @@ function Table({ columns, data }) {
                     </div>
                   )
                 })}
+                {/* <h2 className="tr td">sdkja</h2> */}
               </div>
             )
           })}
         </div>
+
+
+        {/* <div>
+        <button onClick={() => gotoPage(0)} disabled={!canPreviousPage}>
+          {"<<"}
+        </button>{" "}
+        <button onClick={() => previousPage()} disabled={!canPreviousPage}>
+          {"<"}
+        </button>{" "}
+        <button onClick={() => nextPage()} disabled={!canNextPage}>
+          {">"}
+        </button>{" "}
+        <button onClick={() => gotoPage(pageCount - 1)} disabled={!canNextPage}>
+          {">>"}
+        </button>{" "}
+        <span>
+          Page{" "}
+          <strong>
+            {pageIndex + 1} of {pageOptions.length}
+          </strong>{" "}
+        </span>
+        <span>
+          | Go to page:{" "}
+          <input
+            type="number"
+            defaultValue={pageIndex + 1}
+            onChange={e => {
+              const page = e.target.value ? Number(e.target.value) - 1 : 0;
+              gotoPage(page);
+            }}
+            style={{ width: "100px" }}
+          />
+        </span>{" "}
+        <select
+          value={pageSize}
+          onChange={e => {
+            setPageSize(Number(e.target.value));
+          }}
+        >
+          {[10, 20, 30, 40, 50].map(pageSize => (
+            <option key={pageSize} value={pageSize}>
+              Show {pageSize}
+            </option>
+          ))}
+        </select>
+      </div> */}
+
       </div>
     )
   }
-
-
-
-const StockInfo =(props)=>{
-
-    
-
-    const[columns,setColumns] =  useState([]);
+  
+  
+  
+  const StockInfo =(props)=>{
     const[data,setData] =  useState([]);
+    const[columns,setColumns] =  useState([]);
 
     useEffect(() => {
-        axios.defaults.baseURL = 'http://localhost:3001';
-        let dataEle={};
-        axios.get('/posts')
-        .then((res)=>{
-            console.log("response from stock table",res.data);
-            res.data.InStore.map((ele)=>{
-                setData((dataRecord)=>[...dataRecord,ele]);
-            })
-            Object.entries(res.data.InStore[0]).map(([key,value]) => {
-                dataEle={
-                    Header: () => (
+      let dataEle=[];
+      // let datagram=[{
+      //   "id":2,
+      //   "itemName":"jfdkds",
+      //   "qtyMeasure":"Kg",
+      //   "currentQtyInStock":"20kg",
+      //   "lastSuppliedQty":"rt",
+      //   "lastUpdatedOn": "rew"
+
+      // }]
+      if(props.stockInfoData.length!=0)
+      setData(props.stockInfoData);
+      // Object.entries(res.data[0]).map(([key,value]) => {
+        
+        dataEle=[{
+         Header: () => (
+                   <span>
+                    <h4>SNo.</h4>
+                   </span>
+                 ),
+               accessor: "id",
+             },{
+              Header: () => (
                         <span>
-                         <h4>{key}</h4>
+                         <h4>Item Name</h4>
                         </span>
                       ),
-                    accessor: key,
-                   }
-                   setColumns(addHeader=>[...addHeader,dataEle])
-            })
-        })
-        .catch((err)=>{
-            console.log("error",err);
-        })
+                    accessor: "itemName",
+             },{
         
-    }, [])
+               Header: () => (
+                         <span>
+                          <h4>Units</h4>
+                         </span>
+                       ),
+                     accessor: "qtyMeasure"},{
+        
+         Header: () => (
+                   <span>
+                    <h4>Current Qty. In Stock</h4>
+                   </span>
+                 ),
+               accessor: "currentQtyInStock"},{
+         Header: () => (
+                   <span>
+                    <h4>Last Supplied Qty.</h4>
+                   </span>
+                 ),
+               accessor: "lastSuppliedQty",
+        },{
+         Header: () => (
+                   <span>
+                    <h4>Last Updated On</h4>
+                   </span>
+                 ),
+               accessor: "lastUpdatedOn",
+        }];
+        setColumns(dataEle);
 
+    }, [props])
+
+      
+  
+
+
+    // const csvFilePath='./akhil.csv';
+    
 
 let content = (
+    <div className="card bg-primary mainContent">
+    {/* <h1>Home</h1> */}
 
     <Styles>
       <Table columns={columns} data={data} />
     </Styles>
+        </div>
 
 
 

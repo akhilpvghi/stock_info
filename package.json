@@ -2,24 +2,35 @@
   "name": "store_info",
   "version": "0.1.0",
   "private": true,
+  "homepage": ".",
   "dependencies": {
-    "@testing-library/jest-dom": "^4.2.4",
-    "@testing-library/react": "^9.5.0",
-    "@testing-library/user-event": "^7.2.1",
     "axios": "^0.19.2",
     "bootstrap": "^4.5.0",
+    "concurrently": "^5.2.0",
+    "edit-json-file": "^1.4.0",
+    "electron": "^9.0.5",
+    "file-saver": "^2.0.2",
+    "fluent-ffmpeg": "^2.1.0",
     "json-server": "^0.16.1",
+    "papaparse": "^5.2.0",
     "react": "^16.13.1",
+    "react-csv": "^2.0.3",
     "react-dom": "^16.13.1",
     "react-scripts": "3.4.1",
+    "react-select": "^3.1.0",
     "react-table": "^7.2.2",
-    "styled-components": "^4.3.2"
+    "styled-components": "^4.3.2",
+    "xlsx": "^0.16.3"
   },
   "scripts": {
     "start": "react-scripts start",
+    "dev": "concurrently \"npm run start\" \"npx json-server --watch db.json --port 3001\"",
     "build": "react-scripts build",
     "test": "react-scripts test",
-    "eject": "react-scripts eject"
+    "eject": "react-scripts eject",
+    "electron": "electron .",
+    "webpack": "^2.3.2",
+    "webpack-dev-server": "^2.4.2"
   },
   "eslintConfig": {
     "extends": "react-app"
@@ -35,5 +46,8 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
+  },
+  "devDependencies": {
+    "webpack-cli": "^3.3.12"
   }
 }

@@ -1,0 +1,73 @@
+.addIn {
+    /* margin: 18px; */
+    display: flex;
+    flex-direction: column;
+    width: 32em;
+}
+
+.adjustWidth {
+    width: 85%;
+    /* margin-top: -10px; */
+    /* margin-bottom: 15px; */
+    border-radius: 50PX;
+    height: 41px;
+    padding-left: 11px;
+    border: 1px solid grey;
+}
+
+.adjustWidth:hover {
+    outline: 0;
+    border-color: #2684FF;
+    /* border-radius: 50PX; */
+    border: teal 1.5px dashed;
+}
+
+.adjustWidth:focus {
+    outline: 0;
+    border-color: #2684FF;
+    /* border-radius: 50PX; */
+    border: #2684FF 1.5px solid;
+}
+
+/* .adjustWidthForMultiSelect {
+    width: 30em;
+    margin-top: -10px;
+    margin-bottom: 15px;
+    border-radius: 50PX;
+    padding-left: 11px;
+} */
+
+
+
+.fixedDisplay {
+    display: inline;
+    padding-left: 20px;
+}
+
+.displayUnset{
+    display: unset;
+}
+
+.blinking{
+    animation:blinkingText 1.2s infinite;
+    font-weight: 900;
+}
+@keyframes blinkingText{
+    0%{     color: rgb(255, 0, 0);    }
+    49%{    color: rgb(255, 0, 0);; }
+    60%{    color: transparent; }
+    99%{    color:transparent;  }
+    100%{   color: rgb(255, 0, 0);;    }
+}
+
+p.addIner.blinking {
+    margin-left: 37px;
+    /* margin-top: -17px; */
+}
+
+button.fixedDisplay.adjustWidth.mt-15 {
+    margin-top: 15px;
+    border-radius: 50PX;
+    height: 41px;
+    padding-left: 11px;
+}
