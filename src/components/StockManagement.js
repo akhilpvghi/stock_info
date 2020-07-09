@@ -312,7 +312,7 @@ function Table({ columns, data }) {
             }else if(!RegExp("^[0-9]+(?:\.[0-9]+)?$", "g").test(
                 userInput.priceForItem
               )){
-                  setError({ ["priceForItem"]: "Price can only be a positive numeic value" });
+                  setError({ ["priceForItem"]: "Price can only be a positive numeric value" });
                   errorTestPass=false;
               }
             
@@ -371,7 +371,7 @@ function Table({ columns, data }) {
     <div className="col-md-12 addIn">
     <label className="fixedDisplay">Item Name:</label>
     <input
-      // className="adjustWidth"
+      // className="adjustWidth"  
       placeholder="Enter Item Name"
       name="itemName"
       onChange={handleChange}
@@ -417,8 +417,7 @@ onChange={(chosenOption)=>{
     <p className="addIner blinking">{error.priceForItem} </p>
   </div>
   <div className="modal-footer">
-{true?<button type="button" className="btn btn-success" onClick={()=>readyToSubmit()} >Submit</button>
-  :null}
+    <button type="button" className="btn btn-success" onClick={()=>readyToSubmit()} >Submit</button>
     </div>
 
     </div>);

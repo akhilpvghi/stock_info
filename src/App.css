@@ -49,3 +49,8 @@
   flex-direction: column;
   align-items: center;
 }
+
+.add.stock_table{
+  margin: 0.5em 0 0;
+  width: -webkit-fill-available;
+}

@@ -6,12 +6,21 @@
 import Store from './store';
     const Home = ()=>{
         const navbarElementsFromHome = ["Stock Table", "Stock Management", "Store" , "About"];
-        const[componentName,setComponentName]=useState("Store");
+        const[componentName,setComponentName]=useState("Stock Table");
         const[component,setComponent] =  useState(null);
         const [collapsed, setCollapsed] = useState(true);
         const[stockInfodata,setStockInfodata] =  useState([]);
+        const [showModalObject, setShowModalObject] = useState({"status":null})
+        const [isChildDone, setIsChildDone] = useState(false)
+
+        let addItemInStock=(id,itemName,qtyMeasure)=>{
+            setShowModalObject({"data":{"id":id,"itemName":itemName,"qtyMeasure":qtyMeasure},"status":"show"});
+            // console.log("yehi call horha h ",itemName);
+        }
+               
         
         useEffect(() => {
+            console.log("MAIN API called");
             let res;
             if(stockInfodata.length==0){
             axios.defaults.baseURL = 'http://localhost:5000';
@@ -19,7 +28,17 @@ import Store from './store';
             .then((res)=>{
                 console.log("response from stock table",res.data);
                 // res=res.data;
-                setStockInfodata(res.data);
+                let addHtml=[];
+                
+                 res.data.map((ele)=>{
+                     let newObj={};
+                     ele["status"]=(<div class="add">+</div>)
+                     newObj={...ele,...{"status":(<div class="add stock_table" onClick={()=>addItemInStock(ele["id"],ele["itemName"],ele["qtyMeasure"],)}>Fill Stock For {ele["itemName"]}</div>)} }
+                     addHtml=[...addHtml,newObj];
+                    // addHtml=[...newObj,{"status":(<div class="add">+</div>)}]
+                })
+                // {"status":(<div class="add">+</div>)}
+                setStockInfodata(addHtml);
                 // console.log("stockInfoData={data}   ",res);
             })
             .catch((err)=>{
@@ -27,7 +46,7 @@ import Store from './store';
             })
             
         }
-          }, [])
+          }, [isChildDone])
         
 
         const getContentFromHome =()=>{
@@ -47,10 +66,22 @@ import Store from './store';
             setComponentName(data_from_menu);
             }
 
+            let responseFromChild=(evt)=>{
+                setShowModalObject({...showModalObject,...{"status":""}});
+                window.location.reload(false);
+                // setComponentName("home");
+                // // setComponentName("Stock Table");
+                // // setStockInfodata(stockInfodata);
+                // setIsChildDone(true);
+                // return isChildDone;
+                console.log("child called in parent",evt);
+            }
+
         useEffect(()=>{
+            console.log("is it also called");
             switch (componentName) {
                 case 'Stock Table':
-                    setComponent(<StockInfo stockInfoData={stockInfodata}/>)
+                    setComponent(<StockInfo stockInfoData={stockInfodata} showModalHomeObject={showModalObject} getResponseFromChild={responseFromChild}/>)
                     // stockInfoData={data}
                     break;
                 case 'Stock Management':
@@ -65,7 +96,7 @@ import Store from './store';
                         getContentFromHome();
                     break;
             }
-        },[componentName,stockInfodata])
+        },[componentName,stockInfodata,showModalObject,isChildDone])
 
 
         let content = (<div className="wrapper">
