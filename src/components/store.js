@@ -9,6 +9,7 @@ const Store =(props)=> {
 	const [itemListToSupplly, setItemListToSupplly] = useState([{}]);
 	const [stockInfoData, setStockInfoData] = useState([]);
 	const [optionsForItems, setOptionsForItems] = useState([]);
+	const [optionsForItemsPersistent, setOptionsForItemsPersistent] = useState([]);
 	const [totalAmount, setTotalAmount] = useState(0);
 	const [dataToSend, setDataToSend] = useState([]);
 	const menu = useRef([]);
@@ -49,6 +50,7 @@ const Store =(props)=> {
 
 				// setMainStateObjectOfStore((dataStore)=>[...dataStore,mainObjectOfStore]);
 				setOptionsForItems((data)=>[...data,option]);
+				setOptionsForItemsPersistent((data)=>[...data,option]);
 			})
 		}
 		// setStockInfoData(props.stockInfoData)
@@ -56,14 +58,17 @@ const Store =(props)=> {
 
 	let addMoreItemToSupply=()=>{
 		// let newItem={}
-		let toRemoveFromOptions = optionsForItems;
-
-		itemListToSupplly.map((ele)=>console.log("current items",ele.itemName));
+		// let toRemoveFromOptions = optionsForItems;
+		// // setOptionsForItems(optionsForItemsPersistent);
+		// itemListToSupplly.map((ele)=>console.log("current items",ele.itemName));
+		// optionsForItems.map((ele)=>console.log("current items optionsForItems",ele.value));
 
 	// 	let updatedOptionList = optionsForItems.filter((OptionItems)=>{
 		let updatedOptionList=[];
+		updatedOptionList=optionsForItemsPersistent;
 		itemListToSupplly.map((selectedItems)=> {
-			 updatedOptionList = optionsForItems.filter((ele)=>ele.value!==selectedItems.itemName)
+			// updatedOptionList=[];
+			updatedOptionList = updatedOptionList.filter((ele)=>selectedItems.itemName!==ele.value); 
 		})
 	//    })
 
@@ -73,8 +78,18 @@ const Store =(props)=> {
 		// setItemListToSupplly((addedItem)=>[...addedItem,mainStateObjectOfStore]);
 		setItemListToSupplly((addedItem)=>[...addedItem,{}]);
 	}
-	let reduceItemToSupply=()=>{
-		// let newItem={}
+	let reduceItemToSupply=(ele,index)=>{
+		let totalPrice=0;
+		let reduceCurrArr=[];
+		reduceCurrArr=itemListToSupplly.filter((elem)=>elem!==ele)
+		reduceCurrArr.map((ele)=>{
+			totalPrice+=ele["itemTotalPrice"];
+			
+		})
+		
+		setItemListToSupplly(reduceCurrArr);
+		
+		setTotalAmount(totalPrice);
 		console.log("addMOreItemCallled   ",itemListToSupplly.length);
 		// setItemListToSupplly(itemListToSupplly.filter(item => item.name !== name));
 	}
@@ -110,7 +125,7 @@ const Store =(props)=> {
 		let arrItemListTosuuply=[...itemListToSupplly];
 		let qty=parseInt(chars);
 		itemTotalPrice = arrItemListTosuuply[index]["price"]*qty;
-		if(qty!==NaN)
+		// if(qty!==NaN)
 		arrItemListTosuuply[index]["amountToSupply"]=qty;
 		arrItemListTosuuply[index]["itemTotalPrice"]=itemTotalPrice;
 		arrItemListTosuuply.map((ele)=>{
@@ -209,7 +224,7 @@ let content =(
 				<tbody>
 					{itemListToSupplly.map((ele,index)=>{
 						return (<tr key={index} >
-							<td ><div class="cut" onClick={()=>reduceItemToSupply()}>-</div>
+							<td ><div class="cut" onClick={()=>reduceItemToSupply(ele,index)}>-</div>
 							<Select
 //   className="adjustWidthForMultiSelect"
 name="itemList"
@@ -227,7 +242,7 @@ onChange={(chosenOption)=>{
 							<td><h5 data-prefix>Rs. {itemListToSupplly[index]["price"]}</h5></td>
 							<td>
 								{/* <input placeholder="Qty" type="text"/> */}
-								<h5 contentEditable onInput={(e)=>handleChange(e.currentTarget.textContent,index)}>0</h5>
+								<h5 contentEditable key={index} onInput={(e)=>handleChange(e.currentTarget.textContent,index)}>{ele["amountToSupply"]}</h5>
 								</td>
 							<td><span data-prefix></span><h5> {itemListToSupplly[index]["itemTotalPrice"] ?`Rs ${itemListToSupplly[index]["itemTotalPrice"]}` : "Enter Valid Qty"}</h5></td>
 						</tr>)
