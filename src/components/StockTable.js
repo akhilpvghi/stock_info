@@ -6,12 +6,6 @@ import { useTable, useBlockLayout, useResizeColumns, usePagination } from 'react
 import axios from 'axios';
 import AppModal from './helper/AppModal'
 import Processing from './helper/processing';
-// import Papa from 'papaparse'
-// import Pagination from './helper/pagination';
-// import readXlsxFile from 'read-excel-file'
-// import csvtojson  from 'csvtojson';
-// import * as fs from 'fs';
-
 
 const Styles = styled.div`
 padding: 1rem;
@@ -87,16 +81,7 @@ function Table({ columns, data }) {
         getTableBodyProps,
         headerGroups,
         rows,
-        prepareRow,
-        canPreviousPage,
-        canNextPage,
-        pageOptions,
-        pageCount,
-        gotoPage,
-        nextPage,
-        previousPage,
-    setPageSize,
-    state: { pageIndex, pageSize }
+        prepareRow
   } = useTable({
       columns,
       data,
@@ -147,50 +132,6 @@ function Table({ columns, data }) {
         </div>
 
 
-        {/* <div>
-        <button onClick={() => gotoPage(0)} disabled={!canPreviousPage}>
-        {"<<"}
-        </button>{" "}
-        <button onClick={() => previousPage()} disabled={!canPreviousPage}>
-        {"<"}
-        </button>{" "}
-        <button onClick={() => nextPage()} disabled={!canNextPage}>
-        {">"}
-        </button>{" "}
-        <button onClick={() => gotoPage(pageCount - 1)} disabled={!canNextPage}>
-        {">>"}
-        </button>{" "}
-        <span>
-        Page{" "}
-        <strong>
-        {pageIndex + 1} of {pageOptions.length}
-        </strong>{" "}
-        </span>
-        <span>
-        | Go to page:{" "}
-        <input
-        type="number"
-        defaultValue={pageIndex + 1}
-        onChange={e => {
-          const page = e.target.value ? Number(e.target.value) - 1 : 0;
-          gotoPage(page);
-        }}
-        style={{ width: "100px" }}
-        />
-        </span>{" "}
-        <select
-        value={pageSize}
-        onChange={e => {
-          setPageSize(Number(e.target.value));
-        }}
-        >
-        {[10, 20, 30, 40, 50].map(pageSize => (
-          <option key={pageSize} value={pageSize}>
-          Show {pageSize}
-          </option>
-          ))}
-          </select>
-        </div> */}
 
       </div>
     )
@@ -203,7 +144,6 @@ function Table({ columns, data }) {
   const StockInfo =(props)=>{
     const[data,setData] =  useState([]);
     const[columns,setColumns] =  useState([]);
-    const [showModal, setShowModal] = useState({status: ""});
     const [dataFromHome, setDataFromHome] = useState({});
     const [fillStockValue, setFillStockValue] = useState("");
     const [fillInputError, setFillInputError] = useState("");
@@ -305,20 +245,8 @@ function Table({ columns, data }) {
     useEffect(() => {
       let dataEle=[];
       setDataFromHome(props.showModalHomeObject);
-      // let datagram=[{
-      //   "id":2,
-      //   "itemName":"jfdkds",
-      //   "qtyMeasure":"Kg",
-      //   "currentQtyInStock":"20kg",
-      //   "lastSuppliedQty":"rt",
-      //   "lastUpdatedOn": "rew"
-
-      // }]
       if(props.stockInfoData.length!=0)
       setData(props.stockInfoData);
-      // {"status":(<div class="add">+</div>)
-      // Object.entries(res.data[0]).map(([key,value]) => {
-        
         dataEle=[{
          Header: () => (
                    <span>

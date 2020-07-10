@@ -22,11 +22,6 @@ let content = (<nav id="sidebar" className={`${!collapsed ? "" : "active"}`}>
 
 <ul className="list-unstyled components">
     <p>Admin</p>
-    {/* <li className="active">
-        <a href="#homeSubmenu" data-toggle="collapse" aria-expanded="false" className="dropdown-toggle">Home</a>
-        <ul className="collapse list-unstyled" id="homeSubmenu">
-        </ul>
-    </li> */}
     {props.navbarElementsFromHome ? props.navbarElementsFromHome.map((ele,index)=>{
                 return ( <li key={index} onClick={()=>getLink(ele)}>
                     <a>{ele}</a>
@@ -38,9 +33,6 @@ let content = (<nav id="sidebar" className={`${!collapsed ? "" : "active"}`}>
     <li>
         <a href="https://bootstrapious.com/tutorial/files/sidebar.zip" className="download">Download Excel</a>
     </li>
-    {/* <li>
-        <a href="https://bootstrapious.com/p/bootstrap-sidebar" className="article">Back to article</a>
-    </li> */}
 </ul>
 </nav>
 

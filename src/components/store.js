@@ -35,25 +35,12 @@ const Store =(props)=> {
 		let itemLengthOnScreen=elementItemLength;
 		itemLengthOnScreen-=1;
 		setElementItemLength(itemLengthOnScreen);
-		// let newItem={}
-		// let toRemoveFromOptions = optionsForItems;
-		// // setOptionsForItems(optionsForItemsPersistent);
-		// itemListToSupplly.map((ele)=>console.log("current items",ele.itemName));
-		// optionsForItems.map((ele)=>console.log("current items optionsForItems",ele.value));
-
-	// 	let updatedOptionList = optionsForItems.filter((OptionItems)=>{
 		let updatedOptionList=[];
 		updatedOptionList=optionsForItemsPersistent;
 		itemListToSupplly.map((selectedItems)=> {
-			// updatedOptionList=[];
 			updatedOptionList = updatedOptionList.filter((ele)=>selectedItems.itemName!==ele.value); 
 		})
-	//    })
-
-	// 	// let updatedOptionList = toRemoveFromOptions.filter((el)=>el.value!==chosenOption.value);
 		setOptionsForItems(updatedOptionList);
-		console.log("addMOreItemCallled   ",itemListToSupplly.length);
-		// setItemListToSupplly((addedItem)=>[...addedItem,mainStateObjectOfStore]);
 		setItemListToSupplly((addedItem)=>[...addedItem,{}]);
 	}
 	let reduceItemToSupply=(ele,index)=>{
@@ -72,33 +59,18 @@ const Store =(props)=> {
 		setItemListToSupplly(reduceCurrArr);
 		
 		setTotalAmount(totalPrice);
-		console.log("addMOreItemCallled   ",itemListToSupplly.length);
-		// setItemListToSupplly(itemListToSupplly.filter(item => item.name !== name));
 	}
 
 
 
 	let handleChangeForSelect=(chosenOption,index)=>{
-		// console.log("menu see ===========>  ",menu.current[index]);
 		setError("");
 		let arrToUpdate=[...itemListToSupplly];
-		
-		
-		// arrToUpdate[index]
-		// console.log(" chosenOption chosenOption",chosenOption, currentChosenOption);
-		// setCurrentChosenOption(chosenOption.value);
 		stockInfoData.map((ele)=>{
 			if(ele["itemName"]===chosenOption.value ){
 				arrToUpdate[index]={ ["itemName"]: chosenOption.value, ["price"]: ele["price"],["id"]:ele["id"],["qtyMeasure"]:ele["qtyMeasure"],["amountToSupply"]:"",["currentQtyInStock"]:ele.currentQtyInStock};
 				
-				console.log(" ele[  =======>",ele["price"]);
 			}
-			// && Object.keys(arrToUpdate[index]).length==0
-			// else if(ele["itemName"]===chosenOption.value){
-			// 	let prevArray=itemListToSupplly;
-			// 	prevArray.filter((ele)=>ele.itemName!=arrToUpdate[index].itemName)
-				
-			// }
 		})
 		setItemListToSupplly(arrToUpdate);
 	}
@@ -108,9 +80,6 @@ const Store =(props)=> {
 		let itemTotalPrice=0;
 		let totalPrice=0;
 		let arrItemListTosuuply=[...itemListToSupplly];
-		// console.log("e.target ===>",e.target);
-		console.log("contentEditableTag.current ===>",contentEditableTag.current);
-		// contentEditableTag.current.textContent = e.target.textContent;
 		arrItemListTosuuply[index]["error"]="";
 		try{
 
@@ -127,16 +96,7 @@ const Store =(props)=> {
 				  })
 			  }
 		}catch{
-console.log("please catch error");
 		}
-		// let qty=0	
-	// try {
-		
-	// } catch (error) {
-		
-	// }
-	// let qty=parseFloat(char);
-	// if(qty!==NaN)
 	
 	arrItemListTosuuply[index]["amountToSupply"]=evt.target.value;
 	try{
@@ -155,11 +115,6 @@ console.log("please catch error");
 	setTotalAmount(totalPrice);
 	setItemListToSupplly(arrItemListTosuuply);
 	}
-
-	// useEffect(() => {
-		
-	// }, [itemListToSupplly])
-
 
 	let getDate =()=>{
 		var date = new Date(); 
@@ -190,20 +145,14 @@ return dateString;
 							return "";
 							
 						}	
-					}catch(err){
-						console.log("error===>",err);
+					}catch{
 					}
 					newObj["id"]=ele.id;
 					newObj["itemName"]=ele.itemName;
 					newObj["qtyMeasure"]= ele.qtyMeasure;
 					newObj["lastUpdatedOn"]= date;
 					newObj["amountToSupply"]= ele.amountToSupply.toString();
-					
-					// };
-					// setDataToSend([(dataTobeSent)=>[...dataTobeSent,newObj]]);
 			dataToupdateStock=[...dataToupdateStock,newObj];
-			// console.log("newObj that is sending=======> ", newObj);
-			// setDataToSend([...dataToSend,newObj])
 		})
 		
 		console.log("data that is sending=======> ", dataToupdateStock);
@@ -213,7 +162,6 @@ return dateString;
 			setError("");
 			axios.put('/updateCurrentStockTable',{"itemsToSupply":dataToupdateStock})
 			.then((res)=>{
-				console.log("resssssssss======>",res.data);
 				if(res.data.length!=0)
 				setDatasendingStatus({"status":"done"});
 			}).catch((err)=>{
@@ -247,33 +195,14 @@ OK</div>
 let content =(
 
 <div  className="card bg-primary mainContent store">
-		{/* <div className="header">
-			<h1>Invoice</h1>
-			<div className="address" >
-				<p>Jonathan Neal</p>
-				<p>101 E. Chapman Ave<br />Orange, CA 92866</p>
-				<p>(800) 555-1234</p>
-			</div>
-			<span><img alt="" src="http://www.jonathantneal.com/examples/invoice/logo.png" /><input type="file" accept="image/*" /></span>
-		</div> */}
 		<div className="article">
-			{/* <h1>Recipient</h1>
-			<div className="address" >
-				<p>Some Company<br />c/o Some Guy</p>
-			</div> */}
 			<table class="meta">
 				<tr>
-					{/* <th><span >Invoice #</span></th>
-					<td><span >101138</span></td> */}
 				</tr>
 				<tr>
 					<th><span >Date</span></th>
 					<td><span >{new Date().toDateString()}</span></td>
 				</tr>
-				{/* <tr>
-					<th><span >Amount Due</span></th>
-					<td><span id="prefix" >$</span><span>600.00</span></td>
-				</tr> */}
 			</table>
 			<table class="inventory">
 				<thead>
@@ -307,12 +236,7 @@ onChange={(chosenOption)=>{
 							<td>
 								<input className="removeContentEditable" type="text" onChange={(evt)=>handleChange(evt,index)} placeholder={itemListToSupplly[index]["qtyMeasure"] ?`Enter in ${itemListToSupplly[index]["qtyMeasure"]}`:""} value= {itemListToSupplly[index]["amountToSupply"]}  />
 								<p className="addIner blinking m-0">{itemListToSupplly[index]["error"]}</p>
-								{/* <input></input> */}
-
-								{/* <h5 contentEditable key={index} onInput={(el)=>handleChange(el.currentTarget.textContent,index)}
-								> {itemListToSupplly[index]["amountToSupply"]} </h5> */}
-								{/* dangerouslySetInnerHTML={{__html: ele["amountToSupply"]}} */}
-								{/* ref={contentEditableTag}  */}
+								
 								</td>
 							<td><span data-prefix></span><h5> {itemListToSupplly[index]["itemTotalPrice"] ?`Rs ${itemListToSupplly[index]["itemTotalPrice"]}` : "Enter Valid Qty"}</h5></td>
 						</tr>)
@@ -326,26 +250,14 @@ onChange={(chosenOption)=>{
 					<th><span >Total</span></th>
 					<td><h5 data-prefix>Rs. {totalAmount}</h5></td>
 				</tr>
-				{/* <tr>
-					<th><span >Amount Paid</span></th>
-					<td><span data-prefix>$</span><span >0.00</span></td>
-				</tr> */}
-				{/* <tr>
-					<th><span >Balance Due</span></th>
-					<td><span data-prefix>$</span><span>600.00</span></td>
-				</tr> */}
+				
 			</table>
 			
 			{/* onClick={()=>()} */}
 		</div>
 			<button type="button" className="btn btn-success"  onClick={updateRecord}>Update Record</button>
 			<p className="addIner blinking">{error} </p>
-		{/* <aside>
-			<h1><span >Additional Notes</span></h1>
-			<div >
-				<p>A finance charge of 1.5% will be made on unpaid balances after 30 days.</p>
-			</div>
-		</aside> */}
+		
 		{datasendingStatus.status==="processing" ?  (
          <AppModal componentToLoad={<Processing></Processing>} ></AppModal>
 	) :null}

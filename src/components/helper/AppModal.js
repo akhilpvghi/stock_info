@@ -3,8 +3,6 @@
   const AppModal =(props)=>{
 
     const [componentToLoad, setComponentToLoad] = useState(null);
-    const [showModal, setShowModal] = useState(true)
-    const [isProcessing, setIsProcessing] = useState(false)
     
     useEffect(() => {
       if(props.componentToLoad)
@@ -19,9 +17,6 @@
         <div  id="myModal">
           <div className="modal-dialog incWidth">
               <div className="modal-content incWidth controlOverflow">
-              {/* style={{display: 'inline-table'}} */}
-              
-    
                 {componentToLoad ?  componentToLoad : null }
 
                 

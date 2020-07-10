@@ -9,11 +9,6 @@ import '../styles/appModalInput.css';
 import Select from "react-select";
 import AppModal from './helper/AppModal';
 import Processing from './helper/processing';
-// import Papa from 'papaparse'
-// import Pagination from './helper/pagination';
-// import readXlsxFile from 'read-excel-file'
-// import csvtojson  from 'csvtojson';
-// import * as fs from 'fs';
 
 
 const Styles = styled.div`
@@ -90,16 +85,7 @@ function Table({ columns, data }) {
       getTableBodyProps,
       headerGroups,
       rows,
-      prepareRow,
-    canPreviousPage,
-    canNextPage,
-    pageOptions,
-    pageCount,
-    gotoPage,
-    nextPage,
-    previousPage,
-    setPageSize,
-    state: { pageIndex, pageSize }
+      prepareRow
     } = useTable({
       columns,
       data,
@@ -148,50 +134,6 @@ function Table({ columns, data }) {
         </div>
 
 
-        {/* <div>
-        <button onClick={() => gotoPage(0)} disabled={!canPreviousPage}>
-          {"<<"}
-        </button>{" "}
-        <button onClick={() => previousPage()} disabled={!canPreviousPage}>
-          {"<"}
-        </button>{" "}
-        <button onClick={() => nextPage()} disabled={!canNextPage}>
-          {">"}
-        </button>{" "}
-        <button onClick={() => gotoPage(pageCount - 1)} disabled={!canNextPage}>
-          {">>"}
-        </button>{" "}
-        <span>
-          Page{" "}
-          <strong>
-            {pageIndex + 1} of {pageOptions.length}
-          </strong>{" "}
-        </span>
-        <span>
-          | Go to page:{" "}
-          <input
-            type="number"
-            defaultValue={pageIndex + 1}
-            onChange={e => {
-              const page = e.target.value ? Number(e.target.value) - 1 : 0;
-              gotoPage(page);
-            }}
-            style={{ width: "100px" }}
-          />
-        </span>{" "}
-        <select
-          value={pageSize}
-          onChange={e => {
-            setPageSize(Number(e.target.value));
-          }}
-        >
-          {[10, 20, 30, 40, 50].map(pageSize => (
-            <option key={pageSize} value={pageSize}>
-              Show {pageSize}
-            </option>
-          ))}
-        </select>
-      </div> */}
 
       </div>
     )
@@ -250,7 +192,7 @@ function Table({ columns, data }) {
         res.data.map((ele) => {
             setData((dataRecord)=>[...dataRecord,ele]);
             // data=[...dataRecord,ele];
-        }).catch(()=>setShowModal({"status":"error"}))
+        })
         Object.entries(res.data[0]).map(([key,value]) => {
             dataEle={
                 Header: () => (
