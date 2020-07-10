@@ -354,7 +354,8 @@ function Table({ columns, data }) {
 
     let succesOfModal = (message)=>(<div className="modal-header">
     <h4 className="modal-title alert alert-success">Successfully Added</h4>
-   <div className="primary fa fa-times-circle fa-2x cursrPointer btn btn-primary" onClick={()=>{setShowModal({status: ""})}}>
+   <div className="primary fa fa-times-circle fa-2x cursrPointer btn btn-primary" onClick={()=>{setShowModal({status: ""})
+  window.location.reload(false)}}>
     
     OK</div>
     </div>)

@@ -2,17 +2,21 @@ import React, {useEffect, useState, useReducer, useRef} from 'react';
 import '../styles/store.css'
 import Select from "react-select";
 import axios from 'axios';
+import AppModal from './helper/AppModal'
+import Processing from './helper/processing';
 
 const Store =(props)=> {
 
 	// let currentChosenOption="";
-	const [itemListToSupplly, setItemListToSupplly] = useState([{}]);
+	const [itemListToSupplly, setItemListToSupplly] = useState([{"amountToSupply":""}]);
 	const [stockInfoData, setStockInfoData] = useState([]);
 	const [optionsForItems, setOptionsForItems] = useState([]);
 	const [optionsForItemsPersistent, setOptionsForItemsPersistent] = useState([]);
 	const [totalAmount, setTotalAmount] = useState(0);
-	const [dataToSend, setDataToSend] = useState([]);
-	const menu = useRef([]);
+	const [datasendingStatus, setDatasendingStatus] = useState({"status":null})
+	const [error, setError] = useState("");
+	// const [dataToSend, setDataToSend] = useState([]);
+	const contentEditableTag = useRef([]);
 
 	// const [mainStateObjectOfStore, setMainStateObjectOfStore] = useState([]);
 	// const [userInput, setUserInput] = useReducer(
@@ -43,8 +47,8 @@ const Store =(props)=> {
 			props.stockInfoData.map((ele)=>{
 				let option={};
 				let objectOfItemsForPrice = {};
-				let mainObjectOfStore={};
-				mainObjectOfStore={"index":0,"itemName": ele["itemName"],"price":ele["itemName"],"isSelected": false, "qtyToSupply":0}
+				// let mainObjectOfStore={};
+				// mainObjectOfStore={"index":0,"itemName": ele["itemName"],"price":ele["itemName"],"isSelected": false, "qtyToSupply":0}
 				option={value:ele["itemName"],label:ele["itemName"],id:ele["id"]};
 				objectOfItemsForPrice[ele.itemName]  ="";
 
@@ -97,7 +101,7 @@ const Store =(props)=> {
 
 
 	let handleChangeForSelect=(chosenOption,index)=>{
-		console.log("menu see ===========>  ",menu.current[index]);
+		// console.log("menu see ===========>  ",menu.current[index]);
 		let arrToUpdate=[...itemListToSupplly];
 		
 		
@@ -106,7 +110,8 @@ const Store =(props)=> {
 		// setCurrentChosenOption(chosenOption.value);
 		stockInfoData.map((ele)=>{
 			if(ele["itemName"]===chosenOption.value ){
-				arrToUpdate[index]={ ["itemName"]: chosenOption.value, ["price"]: ele["price"],["id"]:ele["id"],["qtyMeasure"]:ele["qtyMeasure"]};
+				arrToUpdate[index]={ ["itemName"]: chosenOption.value, ["price"]: ele["price"],["id"]:ele["id"],["qtyMeasure"]:ele["qtyMeasure"],["amountToSupply"]:"",["currentQtyInStock"]:ele.currentQtyInStock};
+				
 				console.log(" ele[  =======>",ele["price"]);
 			}
 			// && Object.keys(arrToUpdate[index]).length==0
@@ -119,23 +124,42 @@ const Store =(props)=> {
 		setItemListToSupplly(arrToUpdate);
 	}
 
-	let handleChange=(chars,index)=>{
+	let handleChange=(evt,index)=>{
 		let itemTotalPrice=0;
 		let totalPrice=0;
 		let arrItemListTosuuply=[...itemListToSupplly];
-		let qty=parseInt(chars);
-		itemTotalPrice = arrItemListTosuuply[index]["price"]*qty;
-		// if(qty!==NaN)
-		arrItemListTosuuply[index]["amountToSupply"]=qty;
-		arrItemListTosuuply[index]["itemTotalPrice"]=itemTotalPrice;
-		arrItemListTosuuply.map((ele)=>{
-			totalPrice+=ele["itemTotalPrice"];
-
-		})
-
+		// console.log("e.target ===>",e.target);
+		console.log("contentEditableTag.current ===>",contentEditableTag.current);
+		// contentEditableTag.current.textContent = e.target.textContent;
+		arrItemListTosuuply[index]["error"]="";
+		if(!RegExp("^[0-9]+(?:\.[0-9]+)?$", "g").test(
+			parseInt(evt.target.value)
+		  ) && evt.target.value!="")
+		  arrItemListTosuuply[index]["error"]="Enter Valid Qty/Amt.";
+		// let qty=0	
+	// try {
 		
-		setTotalAmount(totalPrice);
-		setItemListToSupplly(arrItemListTosuuply);
+	// } catch (error) {
+		
+	// }
+	// let qty=parseInt(char);
+	// if(qty!==NaN)
+	arrItemListTosuuply[index]["amountToSupply"]=evt.target.value;
+	try{
+
+		itemTotalPrice = arrItemListTosuuply[index]["price"]*parseInt(evt.target.value);
+	}catch{
+
+	}
+	arrItemListTosuuply[index]["itemTotalPrice"]=itemTotalPrice;
+	arrItemListTosuuply.map((ele)=>{
+		totalPrice+=ele["itemTotalPrice"];
+
+	})
+
+	
+	setTotalAmount(totalPrice);
+	setItemListToSupplly(arrItemListTosuuply);
 	}
 
 	// useEffect(() => {
@@ -154,11 +178,21 @@ return dateString;
 	}
 
 	let updateRecord=()=>{
+		
 		let dataToupdateStock=[];
 		let date = getDate();
 		itemListToSupplly.map((ele)=>{
 			let newObj={};
 			// newObj={
+				if(!RegExp("^[0-9]+(?:\.[0-9]+)?$", "g").test(
+					ele.amountToSupply
+					))
+					{
+						setError("Provided Qty/Amt. can't be proceeded!! Please Check and try Again!!");
+						return "";
+						
+					}	
+					setDatasendingStatus({"status":"processing"});
 				newObj["id"]=ele.id;
 				newObj["itemName"]=ele.itemName;
 				newObj["qtyMeasure"]= ele.qtyMeasure;
@@ -173,13 +207,28 @@ return dateString;
 		})
 
 		console.log("data that is sending=======> ", dataToupdateStock);
+		// if(error===""){
 
-		axios.put('/updateCurrentStockTable',{"itemsToSupply":dataToupdateStock})
-		.then((res)=>{
-			console.log("resssssssss======>",res.data);
-		})
+			axios.put('/updateCurrentStockTable',{"itemsToSupply":dataToupdateStock})
+			.then((res)=>{
+				console.log("resssssssss======>",res.data);
+				if(res.data.length!=0)
+				setDatasendingStatus({"status":"done"});
+			})
+		// }
 	}
 
+	let succesOfModal = (message)=>(<div className="modal-header">
+    <h4 className="modal-title alert alert-success">Successfully Updated!!!</h4>
+   <div className="primary fa fa-times-circle fa-2x cursrPointer btn btn-primary" onClick={()=>
+   {
+	   setDatasendingStatus({"status":null})
+	window.location.reload(false)
+  }}>
+    
+    OK</div>
+	</div>)
+	
 let content =(
 
 <div  className="card bg-primary mainContent store">
@@ -241,8 +290,14 @@ onChange={(chosenOption)=>{
 							<td><span >Updating On {new Date().toDateString()}</span></td>
 							<td><h5 data-prefix>Rs. {itemListToSupplly[index]["price"]}</h5></td>
 							<td>
-								{/* <input placeholder="Qty" type="text"/> */}
-								<h5 contentEditable key={index} onInput={(e)=>handleChange(e.currentTarget.textContent,index)}>{ele["amountToSupply"]}</h5>
+								<input className="removeContentEditable" type="text" onChange={(evt)=>handleChange(evt,index)} placeholder={itemListToSupplly[index]["qtyMeasure"] ?`Enter in ${itemListToSupplly[index]["qtyMeasure"]}`:""} value= {itemListToSupplly[index]["amountToSupply"]}  />
+								<p className="addIner blinking m-0">{itemListToSupplly[index]["error"]}</p>
+								{/* <input></input> */}
+
+								{/* <h5 contentEditable key={index} onInput={(el)=>handleChange(el.currentTarget.textContent,index)}
+								> {itemListToSupplly[index]["amountToSupply"]} </h5> */}
+								{/* dangerouslySetInnerHTML={{__html: ele["amountToSupply"]}} */}
+								{/* ref={contentEditableTag}  */}
 								</td>
 							<td><span data-prefix></span><h5> {itemListToSupplly[index]["itemTotalPrice"] ?`Rs ${itemListToSupplly[index]["itemTotalPrice"]}` : "Enter Valid Qty"}</h5></td>
 						</tr>)
@@ -269,12 +324,19 @@ onChange={(chosenOption)=>{
 			{/* onClick={()=>()} */}
 		</div>
 			<button type="button" className="btn btn-success"  onClick={updateRecord}>Update Record</button>
+			<p className="addIner blinking">{error} </p>
 		{/* <aside>
 			<h1><span >Additional Notes</span></h1>
 			<div >
 				<p>A finance charge of 1.5% will be made on unpaid balances after 30 days.</p>
 			</div>
 		</aside> */}
+		{datasendingStatus.status==="processing" ?  (
+         <AppModal componentToLoad={<Processing></Processing>} ></AppModal>
+	) :null}
+	{datasendingStatus.status==="done" ?  (
+         <AppModal componentToLoad={succesOfModal} ></AppModal>
+    ) :null}
 	</div>
     )
     return content;

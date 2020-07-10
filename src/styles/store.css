@@ -154,3 +154,18 @@ tr:hover .cut { opacity: 1; }
 	height: 1px !important;
 	font-weight: 400 !important;
 }
+
+.removeContentEditable{
+	background: transparent;
+	width: -webkit-fill-available;
+	font-weight: 500;
+    font-size: 1.8em;
+		border: transparent;
+		text-align: right;
+		height: 40px;
+}
+
+.removeContentEditable:focus{
+	background: transparent;
+	outline: none;
+}

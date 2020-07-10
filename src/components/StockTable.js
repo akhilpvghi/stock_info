@@ -3,8 +3,8 @@ import React, { useEffect, useState } from 'react';
 import '../styles/menu.css';
 import styled from 'styled-components'
 import { useTable, useBlockLayout, useResizeColumns, usePagination } from 'react-table'
-import AppModal from './helper/AppModal'
 import axios from 'axios';
+import AppModal from './helper/AppModal'
 import Processing from './helper/processing';
 // import Papa from 'papaparse'
 // import Pagination from './helper/pagination';
@@ -277,12 +277,12 @@ function Table({ columns, data }) {
     let internalInputCompo=(data)=>{
       return (
       <div className="ak">
-          {headerOfModal("Refill Stock")}
+          {headerOfModal(`Refill ${data[`itemName`]}`)}
       <div className="col-md-12 addIn">
       {/* <label className="fixedDisplay">Enter Qty/Amt. to Add in Stock:</label> */}
       <input
         // className="adjustWidth"
-        placeholder={`Enter Qty/Amt. to fill ${data[`itemName`]}`}
+        placeholder={`Enter Qty/Amt. in ${data[`qtyMeasure`]}`}
         name="itemName"
         onChange={handleChange}
         value={fillStockValue}

@@ -6,7 +6,7 @@
 import Store from './store';
     const Home = ()=>{
         const navbarElementsFromHome = ["Stock Table", "Stock Management", "Store" , "About"];
-        const[componentName,setComponentName]=useState("Stock Table");
+        const[componentName,setComponentName]=useState("Store");
         const[component,setComponent] =  useState(null);
         const [collapsed, setCollapsed] = useState(true);
         const[stockInfodata,setStockInfodata] =  useState([]);
