@@ -250,7 +250,7 @@ function Table({ columns, data }) {
         res.data.map((ele) => {
             setData((dataRecord)=>[...dataRecord,ele]);
             // data=[...dataRecord,ele];
-        })
+        }).catch(()=>setShowModal({"status":"error"}))
         Object.entries(res.data[0]).map(([key,value]) => {
             dataEle={
                 Header: () => (
@@ -423,7 +423,15 @@ onChange={(chosenOption)=>{
 
     </div>);
 
+let failureModal = (message)=>(<div className="modal-header">
+<h4 className="modal-title alert alert-danger">Some Error Occurred!!</h4>
+<div className="primary fa fa-times-circle fa-2x cursrPointer btn btn-warning" onClick={()=>
+{
+   showModal({"status":null})
+}}>
 
+OK</div>
+</div>)
 
 
 
@@ -448,6 +456,9 @@ let content = (
     ) :null}
     {showModal.status=="done" ?  (
         <AppModal componentToLoad={succesOfModal} ></AppModal>
+    ) :null}
+    {showModal.status==="error" ?  (
+         <AppModal componentToLoad={failureModal} ></AppModal>
     ) :null}
         </div>
 

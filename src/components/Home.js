@@ -6,7 +6,7 @@
 import Store from './store';
     const Home = ()=>{
         const navbarElementsFromHome = ["Stock Table", "Stock Management", "Store" , "About"];
-        const[componentName,setComponentName]=useState("Store");
+        const[componentName,setComponentName]=useState("Stock Table");
         const[component,setComponent] =  useState(null);
         const [collapsed, setCollapsed] = useState(true);
         const[stockInfodata,setStockInfodata] =  useState([]);
@@ -21,13 +21,11 @@ import Store from './store';
         
         useEffect(() => {
             console.log("MAIN API called");
-            let res;
             if(stockInfodata.length==0){
             axios.defaults.baseURL = 'http://localhost:5000';
             axios.get('/currentStockTable')
             .then((res)=>{
                 console.log("response from stock table",res.data);
-                // res=res.data;
                 let addHtml=[];
                 
                  res.data.map((ele)=>{

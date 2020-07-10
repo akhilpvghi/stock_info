@@ -245,7 +245,7 @@ function Table({ columns, data }) {
                     if(res.data.length!=0)
                     setDataFromHome({...dataFromHome,...{"status":"done"}})
                       console.log("response from updation of  adding stock table",res.data);
-                  })
+                  }).catch(()=> setDataFromHome({...dataFromHome,...{"status":"error"}}))
       }else{
         setFillInputError("Qty/Amt. can only be a positive numeric value");
       }
@@ -374,6 +374,15 @@ function Table({ columns, data }) {
     }, [props])
 
     
+    let failureModal = ()=>(<div className="modal-header">
+<h4 className="modal-title alert alert-danger">Some Error Occurred!!</h4>
+<div className="primary fa fa-times-circle fa-2x cursrPointer btn btn-warning" onClick={()=>
+{
+   setDataFromHome({"status":null})
+}}>
+
+OK</div>
+</div>)
   
 
 
@@ -395,6 +404,9 @@ let content = (
     ) :null}
     {dataFromHome.status==="done" ?  (
          <AppModal componentToLoad={succesOfModal} ></AppModal>
+    ) :null}
+    {dataFromHome.status==="error" ?  (
+         <AppModal componentToLoad={failureModal} ></AppModal>
     ) :null}
         </div>
 

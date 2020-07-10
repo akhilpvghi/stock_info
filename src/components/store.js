@@ -1,4 +1,4 @@
-import React, {useEffect, useState, useReducer, useRef} from 'react';
+import React, {useEffect, useState, useRef} from 'react';
 import '../styles/store.css'
 import Select from "react-select";
 import axios from 'axios';
@@ -6,8 +6,6 @@ import AppModal from './helper/AppModal'
 import Processing from './helper/processing';
 
 const Store =(props)=> {
-
-	// let currentChosenOption="";
 	const [itemListToSupplly, setItemListToSupplly] = useState([{"amountToSupply":""}]);
 	const [stockInfoData, setStockInfoData] = useState([]);
 	const [optionsForItems, setOptionsForItems] = useState([]);
@@ -15,52 +13,28 @@ const Store =(props)=> {
 	const [totalAmount, setTotalAmount] = useState(0);
 	const [datasendingStatus, setDatasendingStatus] = useState({"status":null})
 	const [error, setError] = useState("");
-	// const [dataToSend, setDataToSend] = useState([]);
+	const [elementItemLength, setElementItemLength] = useState(0);
 	const contentEditableTag = useRef([]);
-
-	// const [mainStateObjectOfStore, setMainStateObjectOfStore] = useState([]);
-	// const [userInput, setUserInput] = useReducer(
-    //     (state, newState) => ({ ...state, ...newState }),
-    //     { 
-    //     }
-	//   );
-	  
-	//   const [priceForItem, setpriceForItem] = useReducer(
-    //     (state, newState) => ({ ...state, ...newState }),
-    //     {
-    //     }
-    //   );
-    
-    //   const [error, setError] = useReducer(
-    //     (state, newState) => ({ ...state, ...newState }),
-    //     {
-    //     itemName : "",
-    //     priceForItem: "",
-    //     selectUnit:""
-    //     }
-    //   );
-
 	useEffect(() => {
 		if(props.stockInfoData.length!==0)
 		{
 			setStockInfoData(props.stockInfoData);
+			setElementItemLength(props.stockInfoData.length);
 			props.stockInfoData.map((ele)=>{
 				let option={};
 				let objectOfItemsForPrice = {};
-				// let mainObjectOfStore={};
-				// mainObjectOfStore={"index":0,"itemName": ele["itemName"],"price":ele["itemName"],"isSelected": false, "qtyToSupply":0}
 				option={value:ele["itemName"],label:ele["itemName"],id:ele["id"]};
 				objectOfItemsForPrice[ele.itemName]  ="";
-
-				// setMainStateObjectOfStore((dataStore)=>[...dataStore,mainObjectOfStore]);
 				setOptionsForItems((data)=>[...data,option]);
 				setOptionsForItemsPersistent((data)=>[...data,option]);
 			})
 		}
-		// setStockInfoData(props.stockInfoData)
 	}, [])
 
 	let addMoreItemToSupply=()=>{
+		let itemLengthOnScreen=elementItemLength;
+		itemLengthOnScreen-=1;
+		setElementItemLength(itemLengthOnScreen);
 		// let newItem={}
 		// let toRemoveFromOptions = optionsForItems;
 		// // setOptionsForItems(optionsForItemsPersistent);
@@ -83,6 +57,10 @@ const Store =(props)=> {
 		setItemListToSupplly((addedItem)=>[...addedItem,{}]);
 	}
 	let reduceItemToSupply=(ele,index)=>{
+		let itemLengthOnScreen=elementItemLength;
+		itemLengthOnScreen+=1;
+		setElementItemLength(itemLengthOnScreen);
+
 		let totalPrice=0;
 		let reduceCurrArr=[];
 		reduceCurrArr=itemListToSupplly.filter((elem)=>elem!==ele)
@@ -102,6 +80,7 @@ const Store =(props)=> {
 
 	let handleChangeForSelect=(chosenOption,index)=>{
 		// console.log("menu see ===========>  ",menu.current[index]);
+		setError("");
 		let arrToUpdate=[...itemListToSupplly];
 		
 		
@@ -125,6 +104,7 @@ const Store =(props)=> {
 	}
 
 	let handleChange=(evt,index)=>{
+		setError("")
 		let itemTotalPrice=0;
 		let totalPrice=0;
 		let arrItemListTosuuply=[...itemListToSupplly];
@@ -132,22 +112,36 @@ const Store =(props)=> {
 		console.log("contentEditableTag.current ===>",contentEditableTag.current);
 		// contentEditableTag.current.textContent = e.target.textContent;
 		arrItemListTosuuply[index]["error"]="";
-		if(!RegExp("^[0-9]+(?:\.[0-9]+)?$", "g").test(
-			parseInt(evt.target.value)
-		  ) && evt.target.value!="")
-		  arrItemListTosuuply[index]["error"]="Enter Valid Qty/Amt.";
+		try{
+
+			if(!RegExp("^[0-9]+(?:\.[0-9]+)?$", "g").test(
+				evt.target.value)
+			   && evt.target.value!="")
+			  arrItemListTosuuply[index]["error"]="Enter Valid Qty/Amt.";
+			  else {
+				  stockInfoData.map((toCheckQty)=>{
+					  if(toCheckQty["itemName"]===arrItemListTosuuply[index]["itemName"]){
+						  if(parseFloat(toCheckQty["currentQtyInStock"])<parseFloat(evt.target.value))
+						  arrItemListTosuuply[index]["error"]=`${arrItemListTosuuply[index]["itemName"]} is only ${toCheckQty["currentQtyInStock"]} ${toCheckQty["qtyMeasure"]} in Stock`;
+					  }
+				  })
+			  }
+		}catch{
+console.log("please catch error");
+		}
 		// let qty=0	
 	// try {
 		
 	// } catch (error) {
 		
 	// }
-	// let qty=parseInt(char);
+	// let qty=parseFloat(char);
 	// if(qty!==NaN)
+	
 	arrItemListTosuuply[index]["amountToSupply"]=evt.target.value;
 	try{
 
-		itemTotalPrice = arrItemListTosuuply[index]["price"]*parseInt(evt.target.value);
+		itemTotalPrice = arrItemListTosuuply[index]["price"]*parseFloat(evt.target.value);
 	}catch{
 
 	}
@@ -181,41 +175,52 @@ return dateString;
 		
 		let dataToupdateStock=[];
 		let date = getDate();
+		let tempError="";
+		// setError(tempError);
 		itemListToSupplly.map((ele)=>{
 			let newObj={};
 			// newObj={
-				if(!RegExp("^[0-9]+(?:\.[0-9]+)?$", "g").test(
-					ele.amountToSupply
-					))
-					{
-						setError("Provided Qty/Amt. can't be proceeded!! Please Check and try Again!!");
-						return "";
-						
-					}	
-					setDatasendingStatus({"status":"processing"});
-				newObj["id"]=ele.id;
-				newObj["itemName"]=ele.itemName;
-				newObj["qtyMeasure"]= ele.qtyMeasure;
-            	newObj["lastUpdatedOn"]= date;
-            	newObj["amountToSupply"]= ele.amountToSupply.toString();
-
-			// };
-			// setDataToSend([(dataTobeSent)=>[...dataTobeSent,newObj]]);
+				try{
+					if(!RegExp("^[0-9]+(?:\.[0-9]+)?$", "g").test(
+						ele.amountToSupply
+						))
+						{
+							tempError="Provided Qty/Amt. can't be proceeded!! Please Check and try Again!!";
+							setError(tempError);
+							return "";
+							
+						}	
+					}catch(err){
+						console.log("error===>",err);
+					}
+					newObj["id"]=ele.id;
+					newObj["itemName"]=ele.itemName;
+					newObj["qtyMeasure"]= ele.qtyMeasure;
+					newObj["lastUpdatedOn"]= date;
+					newObj["amountToSupply"]= ele.amountToSupply.toString();
+					
+					// };
+					// setDataToSend([(dataTobeSent)=>[...dataTobeSent,newObj]]);
 			dataToupdateStock=[...dataToupdateStock,newObj];
 			// console.log("newObj that is sending=======> ", newObj);
 			// setDataToSend([...dataToSend,newObj])
 		})
-
+		
 		console.log("data that is sending=======> ", dataToupdateStock);
-		// if(error===""){
-
+		if(tempError===""){
+			
+			setDatasendingStatus({"status":"processing"});
+			setError("");
 			axios.put('/updateCurrentStockTable',{"itemsToSupply":dataToupdateStock})
 			.then((res)=>{
 				console.log("resssssssss======>",res.data);
 				if(res.data.length!=0)
 				setDatasendingStatus({"status":"done"});
+			}).catch((err)=>{
+				setDatasendingStatus({"status":"error"});
+				console.log("errr===================>",err);
 			})
-		// }
+		}
 	}
 
 	let succesOfModal = (message)=>(<div className="modal-header">
@@ -228,6 +233,16 @@ return dateString;
     
     OK</div>
 	</div>)
+
+let failureModal = (message)=>(<div className="modal-header">
+<h4 className="modal-title alert alert-danger">Some Error Occurred!!</h4>
+<div className="primary fa fa-times-circle fa-2x cursrPointer btn btn-warning" onClick={()=>
+{
+   setDatasendingStatus({"status":null})
+}}>
+
+OK</div>
+</div>)
 	
 let content =(
 
@@ -305,7 +320,7 @@ onChange={(chosenOption)=>{
 					
 				</tbody>
 			</table>
-			{optionsForItems.length!==0 ? <div class="add" onClick={()=>addMoreItemToSupply()}>+</div> :null}
+			{elementItemLength!==1 ? <div class="add" onClick={()=>addMoreItemToSupply()}>+</div> :null}
 			<table class="balance">
 				<tr>
 					<th><span >Total</span></th>
@@ -336,6 +351,9 @@ onChange={(chosenOption)=>{
 	) :null}
 	{datasendingStatus.status==="done" ?  (
          <AppModal componentToLoad={succesOfModal} ></AppModal>
+    ) :null}
+	{datasendingStatus.status==="error" ?  (
+         <AppModal componentToLoad={failureModal} ></AppModal>
     ) :null}
 	</div>
     )
