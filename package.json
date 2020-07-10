@@ -7,20 +7,15 @@
     "axios": "^0.19.2",
     "bootstrap": "^4.5.0",
     "concurrently": "^5.2.0",
-    "edit-json-file": "^1.4.0",
     "electron": "^9.0.5",
-    "file-saver": "^2.0.2",
     "fluent-ffmpeg": "^2.1.0",
-    "json-server": "^0.16.1",
-    "papaparse": "^5.2.0",
     "react": "^16.13.1",
     "react-csv": "^2.0.3",
     "react-dom": "^16.13.1",
     "react-scripts": "3.4.1",
     "react-select": "^3.1.0",
     "react-table": "^7.2.2",
-    "styled-components": "^4.3.2",
-    "xlsx": "^0.16.3"
+    "styled-components": "^4.3.2"
   },
   "scripts": {
     "start": "react-scripts start",

@@ -1,0 +1,13 @@
+id,itemName,qtyMeasure,currentQtyInStock,lastUpdatedOn,lastUpdatedQty,price
+1,Rice,Kg,0.0,10-07-2020,-245.4,80
+2,Pulses,Kg,34.0,09-07-2020,+10,100
+3,Sabzi,Kg,1.0,10-07-2020,-1,30
+4,Tomato,Ltr,3.0,10-07-2020,-3,34
+5,aloo,Kg,-25.0,10-07-2020,-45,100
+6,fksdf,Kg,0.0,10-07-2020,-22,100
+7,Kungru,Kg,-4.0,09-07-2020,-4,100
+8,Pulses,Kg,-1.0,10-07-2020,-4,80
+9,Pyaaz,Kg,0,08-07-2020,0,80
+10,Dhaniya,Kg,3.0,10-07-2020,+15,80
+11,Kamal Kakdi,Kg,0,2020-07-09,0,80
+12,Bhindi,Kg,-22.0,10-07-2020,-45,80
