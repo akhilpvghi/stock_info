@@ -67,7 +67,7 @@ function Table({ columns, data }) {
   const defaultColumn = React.useMemo(
     () => ({
       minWidth: 30,
-      width: 200,
+      width: 150,
       maxWidth: 300,
       }),
       []
@@ -147,6 +147,7 @@ function Table({ columns, data }) {
     const [dataFromHome, setDataFromHome] = useState({});
     const [fillStockValue, setFillStockValue] = useState("");
     const [fillInputError, setFillInputError] = useState("");
+    const [totalAmountforItemsAtStote, setTotalAmountforItemsAtStote] = useState(0);
 
     let getDate =()=>{
       var date = new Date(); 
@@ -161,6 +162,7 @@ function Table({ columns, data }) {
     let headerOfModal=(message)=>(<div className="modal-header">
     <h4 className="modal-title">{message}</h4>
    <div className="primary fa fa-times-circle fa-2x cursrPointer btn btn-danger" onClick={()=>{setDataFromHome({...dataFromHome,...{"status":null}})
+  responseFromChild(false)
   setFillInputError("")
   setFillStockValue("")
   }} >
@@ -196,8 +198,8 @@ function Table({ columns, data }) {
     }
 
 
-    let responseFromChild=()=>{
-      props.getResponseFromChild("doneRefreshIt");
+    let responseFromChild=(isRefreshRequire)=>{
+      props.getResponseFromChild(isRefreshRequire);
     }
 
     // let showModalObject
@@ -206,7 +208,7 @@ function Table({ columns, data }) {
     <h4 className="modal-title alert alert-success"> Added</h4>
    <div className="primary fa fa-times-circle fa-2x cursrPointer btn btn-primary" onClick={()=>
    {
-    responseFromChild(); 
+    responseFromChild(true); 
     setDataFromHome({...dataFromHome,...{"status":null}})
     
   }}>
@@ -244,9 +246,30 @@ function Table({ columns, data }) {
     
     useEffect(() => {
       let dataEle=[];
-      setDataFromHome(props.showModalHomeObject);
-      if(props.stockInfoData.length!=0)
-      setData(props.stockInfoData);
+      let createDataForStockTable;
+      let newObj;
+      let totalAmtOfItemsAtstore=0;
+      if(props.showModalHomeObject!=undefined)
+      setDataFromHome({...props.showModalHomeObject});
+      if(props.stockInfoData.length!=0){
+        // createDataForStockTable=[...props.stockInfoData];
+        createDataForStockTable=[];
+        props.stockInfoData.map((ele)=>{
+          newObj={}
+          let currentQtyInStockInFloat = parseFloat(ele["currentQtyInStock"]);
+          let priceInFloat = parseFloat(ele["price"]);
+          let totalAmtForAnItem=currentQtyInStockInFloat*priceInFloat;
+          newObj["total"] = `Rs. ${totalAmtForAnItem}`
+          newObj["price"]=`Rs. ${ele["price"]}`
+          newObj["lastUpdatedQty"]=`${ele["lastUpdatedQty"]} ${ele["qtyMeasure"]}`
+          newObj["currentQtyInStock"]=`${ele["currentQtyInStock"]} ${ele["qtyMeasure"]}`
+          totalAmtOfItemsAtstore+=totalAmtForAnItem;
+          createDataForStockTable=[...createDataForStockTable,Object.assign({},ele, newObj)]
+        })
+        setTotalAmountforItemsAtStote(totalAmtOfItemsAtstore);
+        // setData([]);
+        setData(createDataForStockTable);
+      }
         dataEle=[{
          Header: () => (
                    <span>
@@ -265,10 +288,10 @@ function Table({ columns, data }) {
         
                Header: () => (
                          <span>
-                          <h4>Units</h4>
+                          <h4>Price</h4>
                          </span>
                        ),
-                     accessor: "qtyMeasure"},{
+                     accessor: "price"},{
         
          Header: () => (
                    <span>
@@ -276,6 +299,13 @@ function Table({ columns, data }) {
                    </span>
                  ),
                accessor: "currentQtyInStock"},{
+        
+                Header: () => (
+                          <span>
+                           <h4>Total Rs. for Items</h4>
+                          </span>
+                        ),
+                      accessor: "total"},{
          Header: () => (
                    <span>
                     <h4>Last Updated Qty.</h4>
@@ -324,6 +354,13 @@ let content = (
     <Styles>
       <Table columns={columns} data={data} />
     </Styles>
+      <table className="balance">
+				<tr>
+					<th><span >Total</span></th>
+					<td><h5 data-prefix>Rs. {totalAmountforItemsAtStote}</h5></td>
+				</tr>
+				
+			</table>
     {dataFromHome.status==="show" ?  (
         <AppModal componentToLoad={internalInputCompo(props.showModalHomeObject.data)} ></AppModal>
     ) :null}

@@ -29,11 +29,11 @@ let content = (<nav id="sidebar" className={`${!collapsed ? "" : "active"}`}>
   
 </ul>
 
-<ul className="list-unstyled CTAs">
+{/* <ul className="list-unstyled CTAs">
     <li>
         <a href="https://bootstrapious.com/tutorial/files/sidebar.zip" className="download">Download Excel</a>
     </li>
-</ul>
+</ul> */}
 </nav>
 
 )

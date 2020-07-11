@@ -7,11 +7,11 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
-/* *{
+*{
   padding: 0%;
     margin: auto; 
      max-width: -webkit-fill-available;
-} */
+}
 
 
 code {

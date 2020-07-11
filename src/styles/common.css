@@ -19,6 +19,7 @@
 .col-md-12.Appmodal {
     position: fixed;
     z-index: 999 !important;
+    bottom: 43em; 
 }
 
 
@@ -137,6 +138,8 @@ i.fa.fa-chevron-circle-left.fa-3x.floaty-left {
 .incWidth{
   max-width: 523px !important;
   max-height: 600px !important;
+  display: flex;
+  justify-content: center;
 }
 
 .controlOverflow{
@@ -215,3 +218,8 @@ height: 180px;
 }
 }
 
+.css-2b097c-container {
+  margin: unset !important;  
+}
+
+/* above creates problem in modal select option if removed */

@@ -20,6 +20,7 @@ import Store from './store';
         
         useEffect(() => {
             // console.log("MAIN API called");
+            // setShowModalObject({"status":"show"});
             if(stockInfodata.length==0){
             axios.defaults.baseURL = 'http://localhost:5000';
             axios.get('/currentStockTable')
@@ -29,8 +30,8 @@ import Store from './store';
                 
                  res.data.map((ele)=>{
                      let newObj={};
-                     ele["status"]=(<div class="add">+</div>)
-                     newObj={...ele,...{"status":(<div class="add stock_table" onClick={()=>addItemInStock(ele["id"],ele["itemName"],ele["qtyMeasure"],)}>Fill Stock For {ele["itemName"]}</div>)} }
+                     ele["status"]=(<div className="add">+</div>)
+                     newObj={...ele,...{"status":(<div className="add stock_table" onClick={()=>addItemInStock(ele["id"],ele["itemName"],ele["qtyMeasure"],)}>Fill Stock For {ele["itemName"]}</div>)} }
                      addHtml=[...addHtml,newObj];
                 })
                 setStockInfodata(addHtml);
@@ -60,10 +61,12 @@ import Store from './store';
             setComponentName(data_from_menu);
             }
 
-            let responseFromChild=(evt)=>{
-                setShowModalObject({...showModalObject,...{"status":""}});
+            let responseFromChild=(isRefreshRequire)=>{
+
+                setShowModalObject({...showModalObject,...{"status":null}});
+                if(isRefreshRequire)
                 window.location.reload(false);
-                console.log("child called in parent",evt);
+                console.log("child called in parent",isRefreshRequire);
             }
 
         useEffect(()=>{

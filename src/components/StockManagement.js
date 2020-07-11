@@ -190,6 +190,7 @@ function Table({ columns, data }) {
     .then((res)=>{
         console.log("response from stock table",res.data);
         res.data.map((ele) => {
+            // setData([]);
             setData((dataRecord)=>[...dataRecord,ele]);
             // data=[...dataRecord,ele];
         })

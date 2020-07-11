@@ -14,7 +14,7 @@ const Store =(props)=> {
 	const [datasendingStatus, setDatasendingStatus] = useState({"status":null})
 	const [error, setError] = useState("");
 	const [elementItemLength, setElementItemLength] = useState(0);
-	const contentEditableTag = useRef([]);
+	const [buttonDisability, setButtonDisability] = useState(true)
 	useEffect(() => {
 		if(props.stockInfoData.length!==0)
 		{
@@ -76,6 +76,7 @@ const Store =(props)=> {
 	}
 
 	let handleChange=(evt,index)=>{
+		setButtonDisability(false);
 		setError("")
 		let itemTotalPrice=0;
 		let totalPrice=0;
@@ -85,13 +86,17 @@ const Store =(props)=> {
 
 			if(!RegExp("^[0-9]+(?:\.[0-9]+)?$", "g").test(
 				evt.target.value)
-			   && evt.target.value!="")
-			  arrItemListTosuuply[index]["error"]="Enter Valid Qty/Amt.";
+			   && evt.target.value!=""){
+				setButtonDisability(true);
+				arrItemListTosuuply[index]["error"]="Enter Valid Qty/Amt.";
+			   }
 			  else {
 				  stockInfoData.map((toCheckQty)=>{
 					  if(toCheckQty["itemName"]===arrItemListTosuuply[index]["itemName"]){
-						  if(parseFloat(toCheckQty["currentQtyInStock"])<parseFloat(evt.target.value))
-						  arrItemListTosuuply[index]["error"]=`${arrItemListTosuuply[index]["itemName"]} is only ${toCheckQty["currentQtyInStock"]} ${toCheckQty["qtyMeasure"]} in Stock`;
+						  if(parseFloat(toCheckQty["currentQtyInStock"])<parseFloat(evt.target.value)){
+							setButtonDisability(true)
+							  arrItemListTosuuply[index]["error"]=`${arrItemListTosuuply[index]["itemName"]} is only ${toCheckQty["currentQtyInStock"]} ${toCheckQty["qtyMeasure"]} in Stock`;
+						  }
 					  }
 				  })
 			  }
@@ -144,9 +149,12 @@ return dateString;
 							setError(tempError);
 							return "";
 							
-						}	
+						}else{
+							tempError=ele["error"];
+						}
 					}catch{
 					}
+					
 					newObj["id"]=ele.id;
 					newObj["itemName"]=ele.itemName;
 					newObj["qtyMeasure"]= ele.qtyMeasure;
@@ -196,7 +204,7 @@ let content =(
 
 <div  className="card bg-primary mainContent store">
 		<div className="article">
-			<table class="meta">
+			<table className="meta">
 				<tr>
 				</tr>
 				<tr>
@@ -204,7 +212,7 @@ let content =(
 					<td><span >{new Date().toDateString()}</span></td>
 				</tr>
 			</table>
-			<table class="inventory">
+			<table className="inventory">
 				<thead>
 					<tr>
 						<th><span >Item</span></th>
@@ -217,7 +225,7 @@ let content =(
 				<tbody>
 					{itemListToSupplly.map((ele,index)=>{
 						return (<tr key={index} >
-							<td ><div class="cut" onClick={()=>reduceItemToSupply(ele,index)}>-</div>
+							<td ><div className="cut" onClick={()=>reduceItemToSupply(ele,index)}>-</div>
 							<Select
 //   className="adjustWidthForMultiSelect"
 name="itemList"
@@ -244,8 +252,8 @@ onChange={(chosenOption)=>{
 					
 				</tbody>
 			</table>
-			{elementItemLength!==1 ? <div class="add" onClick={()=>addMoreItemToSupply()}>+</div> :null}
-			<table class="balance">
+			{elementItemLength!==1 ? <div className="add" onClick={()=>addMoreItemToSupply()}>+</div> :null}
+			<table className="balance">
 				<tr>
 					<th><span >Total</span></th>
 					<td><h5 data-prefix>Rs. {totalAmount}</h5></td>
@@ -255,7 +263,7 @@ onChange={(chosenOption)=>{
 			
 			{/* onClick={()=>()} */}
 		</div>
-			<button type="button" className="btn btn-success"  onClick={updateRecord}>Update Record</button>
+			<button type="button" className="btn btn-success" disabled={buttonDisability}  onClick={updateRecord}>Update Record</button>
 			<p className="addIner blinking">{error} </p>
 		
 		{datasendingStatus.status==="processing" ?  (
