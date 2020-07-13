@@ -168,7 +168,13 @@ return dateString;
 			
 			setDatasendingStatus({"status":"processing"});
 			setError("");
-			axios.put('/updateCurrentStockTable',{"itemsToSupply":dataToupdateStock})
+					let config = {
+						method: 'put',
+						url: '/updateCurrentStockTable',
+						withCredentials: true,
+						data: {"itemsToSupply":dataToupdateStock}
+					  };
+			axios(config)
 			.then((res)=>{
 				if(res.data.length!=0)
 				setDatasendingStatus({"status":"done"});
@@ -264,7 +270,8 @@ onChange={(chosenOption)=>{
 			{/* onClick={()=>()} */}
 		</div>
 			<button type="button" className="btn btn-success" disabled={buttonDisability}  onClick={updateRecord}>Update Record</button>
-			<p className="addIner blinking">{error} </p>
+			{/* <p className="addIner blinking">{error} </p> */}
+			{ error!=="" ? <p className="addIner blinking alert alert-danger">{error}</p> :null} 
 		
 		{datasendingStatus.status==="processing" ?  (
          <AppModal componentToLoad={<Processing></Processing>} ></AppModal>

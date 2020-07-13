@@ -3,8 +3,13 @@
     display: flex;
     flex-direction: column;
     width: 32em;
+    
 }
 
+.aic {
+    align-items: center !important;
+}
+/* align centre is done for auth appmodal */
 .adjustWidth {
     width: 85%;
     /* margin-top: -10px; */
@@ -60,10 +65,10 @@
     100%{   color: rgb(255, 0, 0);;    }
 }
 
-p.addIner.blinking {
-    margin-left: 37px;
+/* p.addIner.blinking { */
+    /* margin-left: 37px; */
     /* margin-top: -17px; */
-}
+/* } */
 
 button.fixedDisplay.adjustWidth.mt-15 {
     margin-top: 15px;

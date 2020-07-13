@@ -186,7 +186,12 @@ function Table({ columns, data }) {
             
     axios.defaults.baseURL = 'http://localhost:5000';
     let dataEle=[];
-    axios.get('/stockManagement')
+    let config = {
+      method: 'get',
+      url: '/stockManagement',
+      withCredentials: true,
+    };
+    axios(config)
     .then((res)=>{
         console.log("response from stock table",res.data);
         res.data.map((ele) => {
@@ -263,11 +268,17 @@ function Table({ columns, data }) {
                 if(errorTestPass){
                     setShowModal({status:"processing"});
                     setHeaderMessage("Processing");
-                    axios.post('/postIntoStockManagement',{
+                    let config = {
+                      method: 'post',
+                      url: '/postIntoStockManagement',
+                      withCredentials: true,
+                      data: {
                         "itemName": userInput.itemName,
                         "qtyMeasure": userInput.selectUnit.value,
                         "price": userInput.priceForItem
-                    })
+                    }
+                      };
+                    axios(config)
         .then((res)=>{
             console.log("response from Stock Mgmt table",res.data);
             if(res.data.status==="done"){
@@ -322,7 +333,8 @@ function Table({ columns, data }) {
       value={userInput['itemName']}
       type="text"
     />
-    <p className="addIner blinking">{error.itemName} </p>
+    {/* <p className="addIner blinking">{error.itemName} </p> */}
+{ error.itemName!=="" ? <p className="addIner blinking alert alert-danger">{error.itemName}</p> :null} 
   </div>
 
   <div className="col-md-12 addIn">
@@ -344,7 +356,8 @@ onChange={(chosenOption)=>{
 //   isMulti={isMulti}
 //   isSearchable={isMulti}
 />
-<p className="addIner blinking">{error.selectUnit} </p>
+{/* <p className="addIner blinking">{error.selectUnit} </p> */}
+{ error.selectUnit!=="" ? <p className="addIner blinking alert alert-danger">{error.selectUnit}</p> :null} 
 </div>
 
 
@@ -358,7 +371,8 @@ onChange={(chosenOption)=>{
       onChange={handleChange}
       type="text"
     />
-    <p className="addIner blinking">{error.priceForItem} </p>
+    {/* <p className="addIner blinking">{error.priceForItem} </p> */}
+    { error.priceForItem!=="" ? <p className="addIner blinking alert alert-danger">{error.priceForItem}</p> :null} 
   </div>
   <div className="modal-footer">
     <button type="button" className="btn btn-success" onClick={()=>readyToSubmit()} >Submit</button>

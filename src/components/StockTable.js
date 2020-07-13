@@ -67,7 +67,7 @@ function Table({ columns, data }) {
   const defaultColumn = React.useMemo(
     () => ({
       minWidth: 30,
-      width: 150,
+      width: 160,
       maxWidth: 300,
       }),
       []
@@ -176,13 +176,19 @@ function Table({ columns, data }) {
         fillStockValue
       )){
         setDataFromHome({...dataFromHome,...{"status":"processing"}})
-         axios.put('/addInCurrentStockTable',{
-                      "id":data.id,
-                      "itemName": data.itemName,
-                      "qtyMeasure": data.qtyMeasure,
-                      "lastUpdatedOn":date,
-                      "addInCurrentStock": fillStockValue
-                  })
+        let config = {
+          method: 'put',
+          url: '/addInCurrentStockTable',
+          withCredentials: true,
+          data: {
+            "id":data.id,
+            "itemName": data.itemName,
+            "qtyMeasure": data.qtyMeasure,
+            "lastUpdatedOn":date,
+            "addInCurrentStock": fillStockValue
+        }
+          };
+         axios(config)
                   .then((res)=>{
                     if(res.data.length!=0)
                     setDataFromHome({...dataFromHome,...{"status":"done"}})
@@ -230,14 +236,15 @@ function Table({ columns, data }) {
         value={fillStockValue}
         type="text"
       />
-      <p className="addIner blinking">{fillInputError} </p>
+      {/* <p className="addIner blinking">{fillInputError} </p> */}
+      { fillInputError!=="" ? <p className="addIner blinking alert alert-danger">{fillInputError}</p> :null} 
     </div>
   
    
   
   
     
-    <div className="modal-footer">
+    <div className="modal-footer" style={{marginRight:0}}>
       <button type="button" className="btn btn-success"  onClick={()=>readyToSubmit(data)}>Submit</button>
       {/* onClick={()=>readyToSubmit()} */}
       </div>

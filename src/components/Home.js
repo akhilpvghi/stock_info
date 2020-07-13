@@ -1,17 +1,29 @@
-    import React, {useEffect, useState} from 'react';
+    import React, {useEffect, useState, useReducer} from 'react';
     import Menu from './Menu';
     import StockInfo from './StockTable';
     import StockManagement from './StockManagement';
     import axios from 'axios';
 import Store from './store';
+import AppModal from './helper/AppModal';
+import '../styles/appModalInput.css';
+import Processing from './helper/processing';
+import ChangePassword from './ChangePassword'
+// import Cookies from 'universal-cookie';
     const Home = ()=>{
-        const navbarElementsFromHome = ["Stock Table", "Stock Management", "Store" , "About"];
+        const navbarElementsFromHome = ["Stock Table", "Stock Management", "Store" ,"Change Password", "About"];
         const[componentName,setComponentName]=useState("Stock Table");
         const[component,setComponent] =  useState(null);
         const [collapsed, setCollapsed] = useState(true);
         const[stockInfodata,setStockInfodata] =  useState([]);
         const [showModalObject, setShowModalObject] = useState({"status":null})
         const [isChildDone, setIsChildDone] = useState(false)
+        const [isAuthenticated, setIsAuthenticated] = useState(null);
+        const [userInput, setUserInput] = useReducer(
+            (state, newState) => ({ ...state, ...newState }),
+            {}
+          );
+        
+          const [error, setError] = useState("");
 
         let addItemInStock=(id,itemName,qtyMeasure)=>{
             setShowModalObject({"data":{"id":id,"itemName":itemName,"qtyMeasure":qtyMeasure},"status":"show"});
@@ -19,29 +31,68 @@ import Store from './store';
                
         
         useEffect(() => {
-            // console.log("MAIN API called");
-            // setShowModalObject({"status":"show"});
-            if(stockInfodata.length==0){
+            
+            
             axios.defaults.baseURL = 'http://localhost:5000';
-            axios.get('/currentStockTable')
+            // const cookies = new Cookies();
+            // cookies.set('session', 'eyJsb2dnZWRfaW4iOnRydWV9.Xwtm9Q.r8NDvxUywuB7PCD2oRMKeVPADYU; HttpOnly; Path=/', { path: '/' });
+            let config = {
+                method: 'get',
+                url: 'http://localhost:5000/login',
+                withCredentials: true,
+              };
+
+            axios(config)
+        .then((res)=>{
+            // console.log("response from authentication isLOgin",res.data);
+            if(res.data=="success"){
+                setIsAuthenticated(true);
+                callbackExpt(res.data.includes("success"),getStockTableData)
+                // ;
+            }else{
+                setIsAuthenticated(false)
+            }
+        })
+        .catch((err)=>{
+            setError("Something went wrong!! Try Again!!");
+            console.log("error",err);
+        })
+
+          },[])
+        //   isChildDone
+
+
+          let getStockTableData=()=>{
+
+            
+            axios(
+                {
+                    method: 'GET',
+                    url: `/currentStockTable`,
+                    withCredentials: true, 
+                }
+                )
             .then((res)=>{
                 console.log("response from stock table",res.data);
-                let addHtml=[];
-                
-                 res.data.map((ele)=>{
-                     let newObj={};
-                     ele["status"]=(<div className="add">+</div>)
-                     newObj={...ele,...{"status":(<div className="add stock_table" onClick={()=>addItemInStock(ele["id"],ele["itemName"],ele["qtyMeasure"],)}>Fill Stock For {ele["itemName"]}</div>)} }
-                     addHtml=[...addHtml,newObj];
-                })
-                setStockInfodata(addHtml);
+                if(res.data!=='fail'){
+
+                    let addHtml=[];
+                     res.data.map((ele)=>{
+                         let newObj={};
+                         ele["status"]=(<div className="add">+</div>)
+                         newObj={...ele,...{"status":(<div className="add stock_table" onClick={()=>addItemInStock(ele["id"],ele["itemName"],ele["qtyMeasure"],)}>Fill Stock For {ele["itemName"]}</div>)} }
+                         addHtml=[...addHtml,newObj];
+                    })
+                    setStockInfodata(addHtml);
+                }else{
+                    setIsAuthenticated(false)
+                }
             })
             .catch((err)=>{
                 console.log("error",err);
             })
             
-        }
-          }, [isChildDone])
+          }
         
 
         const getContentFromHome =()=>{
@@ -50,7 +101,17 @@ import Store from './store';
             <h1>Home</h1>
                 </div>
                 ) 
-        }
+            }
+            
+            const handleChange = (evt) => {
+                const name = evt.target.name;
+                const newValue = evt.target.value;
+                console.log("name",name," value ",newValue)
+                setUserInput({ [name]: newValue });
+                setError("");
+            // setError({})
+          };
+    
 
         const toggleControl=()=>{
             setCollapsed(!collapsed)
@@ -64,10 +125,84 @@ import Store from './store';
             let responseFromChild=(isRefreshRequire)=>{
 
                 setShowModalObject({...showModalObject,...{"status":null}});
-                if(isRefreshRequire)
-                window.location.reload(false);
+                if(isRefreshRequire){
+
+                    window.location.reload(false);
+                    // getStockTableData()
+                }
+                // setIsAuthenticated(true)
                 console.log("child called in parent",isRefreshRequire);
             }
+
+            let callbackExpt=(status,callback)=>{
+                if (status){
+                    callback();
+                }
+            }
+
+            let authenticateUser=(user)=>{
+                setIsAuthenticated(null);
+                axios.defaults.baseURL = 'http://localhost:5000';
+                // const cookies = new Cookies();
+                // cookies.set('session', 'eyJsb2dnZWRfaW4iOnRydWV9.Xwtm9Q.r8NDvxUywuB7PCD2oRMKeVPADYU; HttpOnly; Path=/', { path: '/' });
+                let config = {
+                    method: 'post',
+                    url: 'http://localhost:5000/login',
+                    withCredentials: true,
+                    // headers: { 
+                    //   'Content-Type': 'application/json', 
+                    //   'Cookie': cookies.get('session')
+                    // //   'session=eyJsb2dnZWRfaW4iOnRydWV9.XwtgTg.H_uWTrMXwFlVkd_CxUKwYamxkvI'
+                    // },
+                    // headers : {'Content-Type': 'application/x-www-form-urlencoded'},
+                    data : {
+                        "username": user.username,
+                        "password": user.password
+                    }
+                  };
+
+                axios(config)
+            .then((res)=>{
+                console.log("response from authentication",res.data);
+                if(res.data.includes("success")){
+                     console.log('cokkkkkkkkkkiieee  ==>',res.headers);
+                     localStorage.setItem("username",user.username)
+                    setIsAuthenticated(true);
+                    callbackExpt(res.data.includes("success"),getStockTableData)
+                    // ;
+                }else{
+                    setError("Credentials did not match!! Try Again!!");
+                    setIsAuthenticated(false)
+                }
+            })
+            .catch((err)=>{
+                setError("Something went wrong!! Try Again!!");
+                console.log("error",err);
+            })
+
+
+
+                // if(user.username==="akhil" && user.password==="123")
+                // setIsAuthenticated(true);
+                // else
+            }
+
+            let logoutUser=()=>{
+                setIsAuthenticated(null);
+                let config = {
+                    method: 'get',
+                    url: '/logout',
+                    withCredentials: true
+                  };
+
+                axios(config)
+            .then((res)=>{
+                console.log("response from authentication",res.data);
+                if(res.data.includes("success"))
+                setIsAuthenticated(false)
+            })
+        }
+        
 
         useEffect(()=>{
             console.log("is it also called");
@@ -82,6 +217,9 @@ import Store from './store';
                     if(stockInfodata.length!=0)
                     setComponent(<Store stockInfoData={stockInfodata}/>)
                     break;
+                case 'Change Password':
+                    setComponent(<ChangePassword username={userInput.username}/>)
+                    break;
                 default:
                         setComponent(null);
                         getContentFromHome();
@@ -89,26 +227,68 @@ import Store from './store';
             }
         },[componentName,stockInfodata,showModalObject,isChildDone])
 
+        let auth=()=>{
 
-        let content = (<div className="wrapper">
-        <Menu collapsed={collapsed} navbarElementsFromHome={navbarElementsFromHome} loadComponent={loadComponent}/>
+            return (
+            
+            <div className="a">
+                <div className="modal-header">
+                <h4 className="modal-title">Authentication Required</h4>
+                
+            </div>
+            <div className="col-md-12 addIn aic">
+                   <label className="fixedDisplay">Username</label>
+                   <input className="adjustWidth" placeholder="Username"  name="username" onChange ={handleChange}   type="text"/>
+                   {/* 
+                   <p className="addIner blinking">hello </p>  
+                   onChange ={handleChange
+                    value={userInput.username}*/
+                }
+                   </div> 
+                   <div className="col-md-12 addIn aic">
+                   <label className="fixedDisplay">Password</label>
+                   <input className="adjustWidth" placeholder="Password"  name="password" onChange ={handleChange}   type="Password"/>
+                   {/* value={userInput.password} onChange ={handleChange} */}
+                   </div> 
+                   {/* <p className="addIner blinking"></p>  */}
+                   <div className="col-md-12 addIn aic" style={{ marginBottom: "10px"}} onClick={()=>authenticateUser(userInput)}><button className="fixedDisplay adjustWidth mt-15" >SUBMIT</button></div>
+                    { error!=="" ? <p className="addIner blinking alert alert-danger">{error}</p> :null} 
+                   {/* onClick={()=>saveToProfileData(userInput)} */}
+                   <div className="modal-footer"><button type="button" className="btn btn-danger" onClick={()=>{this.checkShow("close")}} >Close</button>
+                      
+                          </div>
+            </div>)
+        }
 
-        <div id="content" className={`box ${!collapsed ? "" : "active"}`}>
 
-            <nav className="navbar navbar-expand-lg navbar-light bg-light">
-                <div className="container-fluid">
+        let content = ()=>
+             isAuthenticated  ?  (<div className="wrapper">
 
-                    <button type="button" id="sidebarCollapse" className="btn btn-info" onClick={()=>toggleControl()}>
-                        <i className="fas fa-align-left"></i>
-                        <span>Menu</span>
-                    </button>
-                    <h2>{componentName}</h2>
-                </div>
-            </nav>
-    {component ? component : getContentFromHome()}
-    </div>
-    </div> )
-        return content;
+            <Menu collapsed={collapsed} navbarElementsFromHome={navbarElementsFromHome} loadComponent={loadComponent}/>
+    
+            <div id="content" className={`box ${!collapsed ? "" : "active"}`}>
+    
+                <nav className="navbar navbar-expand-lg navbar-light bg-light">
+                    <div className="container-fluid">
+    
+                        <button type="button" id="sidebarCollapse" className="btn btn-info" onClick={()=>toggleControl()}>
+                            <i className="fas fa-align-left"></i>
+                            <span>Menu</span>
+                        </button>
+                        <h2 className="alert alert-info">{componentName}</h2>
+                    <button className="btn btn-info" onClick={()=>logoutUser()}>Log Out</button>
+                    </div>
+                </nav>
+        {component ? component : getContentFromHome()}
+        </div>
+        </div>): isAuthenticated==null ?(
+                <AppModal componentToLoad={<Processing></Processing>} ></AppModal>
+                ):(<AppModal componentToLoad={auth()} ></AppModal>)
+        
+        let content2=(content())
+        
+             
+        return content2;
 
     }
 

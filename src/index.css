@@ -9,7 +9,7 @@ body {
 
 *{
   padding: 0%;
-    margin: auto; 
+    /* margin: auto;   as it wast disturbing modal-header*/
      max-width: -webkit-fill-available;
 }
 
