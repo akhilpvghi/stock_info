@@ -62,7 +62,7 @@ app.secret_key = 'akhilpandey'
 @app.after_request
 def after_request(response):
   white_origin = ['http://localhost:3000','null']
-  if request.headers['Origin'] in white_origin:
+  if 'HTTP_ORIGIN' in request.environ and request.environ['HTTP_ORIGIN'] in white_origin:
     response.headers.add('Access-Control-Allow-Origin', request.headers['Origin'])
     response.headers.add('Access-Control-Allow-Headers', 'Content-Type,Authorization')
     response.headers.add('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,OPTIONS')
