@@ -66,7 +66,7 @@ const ChangePassword =(props)=>{
           };
           axios(config)
           .then((res)=>{
-            if(res.data.length!==0){
+            if(res.data.includes("success")){
     
                 setShowModal({"status": "success"})
             }
@@ -81,7 +81,7 @@ const ChangePassword =(props)=>{
   }
 
   let succesOfModal = (message)=>(<div className="modal-header">
-    <h4 className="modal-title alert alert-success">Password Changed Successfuly!!</h4>
+    <h4 className="modal-title alert alert-warning">Password Changed Successfuly!!</h4>
    <div className="primary fa fa-times-circle fa-2x cursrPointer btn btn-primary" onClick={()=>{setShowModal({status: null})
   window.location.reload(false)}}>
     

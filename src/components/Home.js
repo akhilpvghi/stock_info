@@ -20,7 +20,8 @@ import ChangePassword from './ChangePassword'
         const [isAuthenticated, setIsAuthenticated] = useState(null);
         const [userInput, setUserInput] = useReducer(
             (state, newState) => ({ ...state, ...newState }),
-            {}
+            {username: "",
+            password:""}
           );
         
           const [error, setError] = useState("");
@@ -141,44 +142,49 @@ import ChangePassword from './ChangePassword'
             }
 
             let authenticateUser=(user)=>{
-                setIsAuthenticated(null);
-                axios.defaults.baseURL = 'http://localhost:5000';
-                // const cookies = new Cookies();
-                // cookies.set('session', 'eyJsb2dnZWRfaW4iOnRydWV9.Xwtm9Q.r8NDvxUywuB7PCD2oRMKeVPADYU; HttpOnly; Path=/', { path: '/' });
-                let config = {
-                    method: 'post',
-                    url: 'http://localhost:5000/login',
-                    withCredentials: true,
-                    // headers: { 
-                    //   'Content-Type': 'application/json', 
-                    //   'Cookie': cookies.get('session')
-                    // //   'session=eyJsb2dnZWRfaW4iOnRydWV9.XwtgTg.H_uWTrMXwFlVkd_CxUKwYamxkvI'
-                    // },
-                    // headers : {'Content-Type': 'application/x-www-form-urlencoded'},
-                    data : {
-                        "username": user.username,
-                        "password": user.password
-                    }
-                  };
 
-                axios(config)
-            .then((res)=>{
-                console.log("response from authentication",res.data);
-                if(res.data.includes("success")){
-                     console.log('cokkkkkkkkkkiieee  ==>',res.headers);
-                     localStorage.setItem("username",user.username)
-                    setIsAuthenticated(true);
-                    callbackExpt(res.data.includes("success"),getStockTableData)
-                    // ;
+                if(userInput.username!=="" && userInput.password!=""){
+                    setIsAuthenticated(null);
+                    axios.defaults.baseURL = 'http://localhost:5000';
+                    // const cookies = new Cookies();
+                    // cookies.set('session', 'eyJsb2dnZWRfaW4iOnRydWV9.Xwtm9Q.r8NDvxUywuB7PCD2oRMKeVPADYU; HttpOnly; Path=/', { path: '/' });
+                    let config = {
+                        method: 'post',
+                        url: 'http://localhost:5000/login',
+                        withCredentials: true,
+                        // headers: { 
+                        //   'Content-Type': 'application/json', 
+                        //   'Cookie': cookies.get('session')
+                        // //   'session=eyJsb2dnZWRfaW4iOnRydWV9.XwtgTg.H_uWTrMXwFlVkd_CxUKwYamxkvI'
+                        // },
+                        // headers : {'Content-Type': 'application/x-www-form-urlencoded'},
+                        data : {
+                            "username": userInput.username,
+                            "password": userInput.password
+                        }
+                      };
+    
+                    axios(config)
+                .then((res)=>{
+                    console.log("response from authentication",res.data);
+                    if(res.data.includes("success")){
+                         console.log('cokkkkkkkkkkiieee  ==>',res.headers);
+                         localStorage.setItem("username",userInput.username)
+                        setIsAuthenticated(true);
+                        callbackExpt(res.data.includes("success"),getStockTableData)
+                        // ;
+                    }else{
+                        setError("Credentials did not match!! Try Again!!");
+                        setIsAuthenticated(false)
+                    }
+                })
+                .catch((err)=>{
+                    setError("Something went wrong!! Try Again!!");
+                    console.log("error",err);
+                })
                 }else{
-                    setError("Credentials did not match!! Try Again!!");
-                    setIsAuthenticated(false)
+                    setError("Field can not be left blank");
                 }
-            })
-            .catch((err)=>{
-                setError("Something went wrong!! Try Again!!");
-                console.log("error",err);
-            })
 
 
 
@@ -189,6 +195,10 @@ import ChangePassword from './ChangePassword'
 
             let logoutUser=()=>{
                 setIsAuthenticated(null);
+                setUserInput({
+                    username:"",
+                    password:""
+                })
                 let config = {
                     method: 'get',
                     url: '/logout',
@@ -251,7 +261,7 @@ import ChangePassword from './ChangePassword'
                    {/* value={userInput.password} onChange ={handleChange} */}
                    </div> 
                    {/* <p className="addIner blinking"></p>  */}
-                   <div className="col-md-12 addIn aic" style={{ marginBottom: "10px"}} onClick={()=>authenticateUser(userInput)}><button className="fixedDisplay adjustWidth mt-15" >SUBMIT</button></div>
+                   <div className="col-md-12 addIn aic" style={{ marginBottom: "10px"}} onClick={()=>authenticateUser()}><button className="fixedDisplay adjustWidth mt-15" >SUBMIT</button></div>
                     { error!=="" ? <p className="addIner blinking alert alert-danger">{error}</p> :null} 
                    {/* onClick={()=>saveToProfileData(userInput)} */}
                    <div className="modal-footer"><button type="button" className="btn btn-danger" onClick={()=>{this.checkShow("close")}} >Close</button>

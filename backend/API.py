@@ -59,13 +59,14 @@ app.secret_key = 'akhilpandey'
 # def unauthorized():
 #     return make_response(jsonify( { 'error': 'Unauthorized access' } ), 403)
 #     # return 403 instead of 401 to prevent browsers from displaying the default auth dialog
-
 @app.after_request
 def after_request(response):
-  response.headers.add('Access-Control-Allow-Origin', "null")
-  response.headers.add('Access-Control-Allow-Headers', 'Content-Type,Authorization')
-  response.headers.add('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,OPTIONS')
-  response.headers.add('Access-Control-Allow-Credentials', 'true')
+  white_origin = ['http://localhost:3000','null']
+  if request.headers['Origin'] in white_origin:
+    response.headers.add('Access-Control-Allow-Origin', request.headers['Origin'])
+    response.headers.add('Access-Control-Allow-Headers', 'Content-Type,Authorization')
+    response.headers.add('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,OPTIONS')
+    response.headers.add('Access-Control-Allow-Credentials', 'true')
   return response
 
 
@@ -285,7 +286,7 @@ def changepassword():
             if  data['username']==request.json['username'] and check_password_hash(data['password'],currPassword):
                 data['password']=generate_password_hash(request.json['newPassword'], method='sha256')
                 writer(readHeader, readData, filename, "update")
-                return jsonify(readData)
+                return "pasword changed successfully"
         else:
             return "old password did not match"
     file.close()
