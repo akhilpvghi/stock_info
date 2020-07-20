@@ -7,7 +7,6 @@ from werkzeug.security import generate_password_hash, check_password_hash
 import csv
 from datetime import date
 from functools import wraps
-from collections import defaultdict
 
 app = Flask(__name__, static_url_path = "/static")
 app.secret_key = 'akhilpandey'
@@ -146,8 +145,8 @@ def updatecurrentstocktable():
         readData = [row for row in csv.DictReader(file)]
         for data in readData:
             for dataFromReq in request.json['itemsToSupply']:
-                if data['item_id']==dataFromReq['item_id'] and data['item_name']==dataFromReq['item_name'] and data['is_last_updated']=="true":
-                    data['curr_qty_in_stock'] = float(data['curr_qty_in_stock'])-float(dataFromReq['amountToSupply'])
+                if data['id']==dataFromReq['id'] and data['itemName']==dataFromReq['itemName']:
+                    data['currentQtyInStock'] = float(data['currentQtyInStock'])-float(dataFromReq['amountToSupply'])
                     data['lastUpdatedOn']=dataFromReq['lastUpdatedOn']
                     data['lastUpdatedQty']="-"+dataFromReq['amountToSupply']
     readHeader = readData[0].keys()
@@ -155,68 +154,22 @@ def updatecurrentstocktable():
     file.close()
     return jsonify(readData)
 
-
-def updateIt(dataImp,dataToBeAppended):
-    filename = "currentstocktable.csv"
-    headerForCurrentStock = ("s_no","item_id","item_name","item_unit","item_per_unit_price","lastUpdatedQty","lastUpdatedOn","curr_qty_in_stock","is_last_updated")
-    files = open(filename, "r")
-    idForCurrentStock=0
-    line=files.readlines()
-    idForCurrentStock=len(line)
-    files.seek(0)
-    files.close()
-    print("dataImp dataImp {}".format(dataImp))
-    for data in dataToBeAppended:
-        data["s_no"]= idForCurrentStock
-        print("dataTobeApppw {}",format(data))
-        writer(headerForCurrentStock, data, filename, "append")
-        idForCurrentStock+=1
-    return jsonify( { 'status': 'done' } ), 201
-
 @app.route('/addInCurrentStockTable', methods = ['PUT'])
 @login_required
 def addInCurrentStockTable():
-    headerForCurrentStock = ("s_no","item_id","item_name","item_unit","item_per_unit_price","lastUpdatedQty","lastUpdatedOn","curr_qty_in_stock","is_last_updated")
-  
     filename = "currentstocktable.csv"
-    dataImp=request.json['items_to_add']
-    # dataToBeAppended = defaultdict(object)
-    dataToBeAppended = []
-    files = open(filename, "r")
-    idForCurrentStock=0
-    line=files.readlines()
-    idForCurrentStock=len(line)
-    files.seek(0)
-    files.close()
     with open(filename, newline= "") as file:
         readData = [row for row in csv.DictReader(file)]
         for data in readData:
-            for dataFromReq in request.json['items_to_add']:
-                if data['item_id']==dataFromReq['item_id'] and data['item_name']==dataFromReq['item_name']:
-                    if float(dataFromReq['lastUpdatedQty']) > 0 and data['is_last_updated']=='true':
-                        data['is_last_updated']="false"
-                        dataForCurrentStock = {
-                            
-                            'item_id': dataFromReq['item_id'],
-                            'item_name': dataFromReq['item_name'],
-                            'item_unit': dataFromReq['item_unit'],
-                            'item_per_unit_price': dataFromReq['item_per_unit_price'],
-                            'lastUpdatedQty': dataFromReq['lastUpdatedQty'],
-                            'lastUpdatedOn': str(date.today()), 
-                            'curr_qty_in_stock': float(data['curr_qty_in_stock'])+float(dataFromReq['lastUpdatedQty']),
-                            'is_last_updated':"true"
-                        }
-                        dataToBeAppended.append(dataForCurrentStock)
-                        # readHeader = readData[0].keys()
-                        writer(headerForCurrentStock, readData, filename, "update")
-                        
-                        # data['lastUpdatedQty'] = float(data['lastUpdatedQty'])+float(dataFromReq['lastUpdatedQty'])
-                        # data['lastUpdatedOn']=dataFromReq['lastUpdatedOn']
-                        # data['is_last_updated']=True
+            if data['id']==request.json['id'] and data['itemName']==request.json['itemName']:
+                if float(request.json['addInCurrentStock']) > 0:
+                    data['currentQtyInStock'] = float(data['currentQtyInStock'])+float(request.json['addInCurrentStock'])
+                    data['lastUpdatedOn']=request.json['lastUpdatedOn']
+                    data['lastUpdatedQty']="+"+request.json['addInCurrentStock']
+    readHeader = readData[0].keys()
+    writer(readHeader, readData, filename, "update")
     file.close()
-    
-    return updateIt(dataImp,dataToBeAppended)
-    
+    return jsonify(readData)
 
 
 @app.route('/currentStockTable', methods = ['GET'])
@@ -246,8 +199,8 @@ def create_task():
     # with open(filename, newline= "") as file:
         # readData = [row for row in csv.DictReader(file)]
         # readHeader = readData[0].keys()
-    headerForStockManagement = ("s_no","item_id", "item_name", "item_unit")
-    headerForCurrentStock = ("s_no","item_id","item_name","item_unit","item_per_unit_price","lastUpdatedQty","lastUpdatedOn","curr_qty_in_stock","is_last_updated")
+    headerForStockManagement = ("id", "itemName", "qtyMeasure", "price")
+    headerForCurrentStock = ("id", "itemName", "qtyMeasure","currentQtyInStock", "lastUpdatedOn","lastUpdatedQty","price")
     
     f = open(filenameForStockManagement, "r")
     idForStockManagement=0
@@ -262,30 +215,28 @@ def create_task():
     idForCurrentStock=len(line)
     files.seek(0)
     files.close()
-    # if not request.json or not 'item_name' in request.json:
+    # if not request.json or not 'itemName' in request.json:
     #     abort(400)
         
     # data = [
-    #     (5, request.json['item_name'], request.json['qtyMeasure'],request.json['price'])
+    #     (5, request.json['itemName'], request.json['qtyMeasure'],request.json['price'])
     # ]
     
     dataForCurrentStock = {
-        's_no':  idForCurrentStock,
-        'item_id': idForStockManagement,
-        'item_name': request.json['item_name'],
-        'item_unit': request.json['item_unit'],
-        'item_per_unit_price': 0,
-        'lastUpdatedQty': 0,
+        'id':  idForCurrentStock,
+        'itemName': request.json['itemName'],
+        'qtyMeasure': request.json['qtyMeasure'],
+        'currentQtyInStock': 0,
         'lastUpdatedOn': str(date.today()),
-        'curr_qty_in_stock': 0,
-        'is_last_updated':"true"
+        'lastUpdatedQty': 0,
+        'price': request.json['price']
     }
     
     dataForStockManagement = {
-        's_no':  idForStockManagement,
-        'item_id': idForStockManagement,
-        'item_name': request.json['item_name'],
-        'item_unit': request.json['item_unit']
+        'id':  idForStockManagement,
+        'itemName': request.json['itemName'],
+        'qtyMeasure': request.json['qtyMeasure'],
+        'price': request.json['price']
     }
     writer(headerForStockManagement, dataForStockManagement, filenameForStockManagement, "append")
     writer(headerForCurrentStock, dataForCurrentStock, filenameForCurrentStock, "append")
