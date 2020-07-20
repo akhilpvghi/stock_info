@@ -312,17 +312,19 @@ function Table({ columns, data }) {
                            <h4>Total Rs. for Items</h4>
                           </span>
                         ),
-                      accessor: "total"},{
+                      accessor: "total"}
+        //               ,{
+        //  Header: () => (
+        //            <span>
+        //             <h4>Last Updated Qty.</h4>
+        //            </span>
+        //          ),
+        //        accessor: "lastUpdatedQty",
+        // }
+        ,{
          Header: () => (
                    <span>
-                    <h4>Last Updated Qty.</h4>
-                   </span>
-                 ),
-               accessor: "lastUpdatedQty",
-        },{
-         Header: () => (
-                   <span>
-                    <h4>Last Updated On</h4>
+                    <h4>Last Updated</h4>
                    </span>
                  ),
                accessor: "lastUpdatedOn",

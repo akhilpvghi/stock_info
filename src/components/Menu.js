@@ -21,7 +21,7 @@ let content = (<nav id="sidebar" className={`${!collapsed ? "" : "active"}`}>
 </div>
 
 <ul className="list-unstyled components">
-    <p>Admin</p>
+    {/* <p>Admin</p> */}
     {props.navbarElementsFromHome ? props.navbarElementsFromHome.map((ele,index)=>{
                 return ( <li key={index} onClick={()=>getLink(ele)}>
                     <a>{ele}</a>

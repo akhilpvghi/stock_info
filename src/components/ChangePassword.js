@@ -115,8 +115,8 @@ const ChangePassword =(props)=>{
    {/* <p className="addIner blinking">{}</p>   */}
    { error!=="" ? <p className="addIner blinking alert alert-danger">{error}</p> :null} 
   {/* onClick={()=>saveToProfileData(userInput)} */}
-  <div className="modal-footer"><button type="button" className="btn btn-danger" onClick={()=>{this.checkShow("close")}} >Close</button>
-     
+  <div className="modal-footer">
+  {/* <button type="button" className="btn btn-danger" onClick={()=>{this.checkShow("close")}} >Close</button> */}
          </div>
          </div>
          );

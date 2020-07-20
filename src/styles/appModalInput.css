@@ -8,6 +8,7 @@
 
 .aic {
     align-items: center !important;
+    height: 5em !important;
 }
 /* align centre is done for auth appmodal */
 .adjustWidth {

@@ -10,8 +10,8 @@ import Processing from './helper/processing';
 import ChangePassword from './ChangePassword'
 // import Cookies from 'universal-cookie';
     const Home = ()=>{
-        const navbarElementsFromHome = ["Stock Table", "Stock Management", "Store" ,"Change Password", "About"];
-        const[componentName,setComponentName]=useState("Stock Table");
+        const navbarElementsFromHome = ["Admin", "Stock Management",  "Store" ,"Change Password", "About"];
+        const[componentName,setComponentName]=useState("Stock Management");
         const[component,setComponent] =  useState(null);
         const [collapsed, setCollapsed] = useState(true);
         const[stockInfodata,setStockInfodata] =  useState([]);
@@ -74,14 +74,14 @@ import ChangePassword from './ChangePassword'
                 }
                 )
             .then((res)=>{
-                console.log("response from stock table",res.data);
+                console.log("response from Stock Management",res.data);
                 if(res.data!=='fail'){
 
                     let addHtml=[];
                      res.data.map((ele)=>{
                          let newObj={};
-                         ele["status"]=(<div className="add">+</div>)
-                         newObj={...ele,...{"status":(<div className="add stock_table" onClick={()=>addItemInStock(ele["id"],ele["itemName"],ele["qtyMeasure"],)}>Fill Stock For {ele["itemName"]}</div>)} }
+                         newObj={...ele,...{"status":(<div className="add stock_table" onClick={()=>addItemInStock(ele["id"],ele["itemName"],ele["qtyMeasure"],)}>Add {ele["itemName"]}</div>),
+                                            "lastUpdatedOn":`${ele["lastUpdatedQty"]} {${ele["lastUpdatedOn"]}}`   } }
                          addHtml=[...addHtml,newObj];
                     })
                     setStockInfodata(addHtml);
@@ -217,10 +217,10 @@ import ChangePassword from './ChangePassword'
         useEffect(()=>{
             console.log("is it also called");
             switch (componentName) {
-                case 'Stock Table':
+                case 'Stock Management':
                     setComponent(<StockInfo stockInfoData={stockInfodata} showModalHomeObject={showModalObject} getResponseFromChild={responseFromChild}/>)
                     break;
-                case 'Stock Management':
+                case 'Admin':
                     setComponent(<StockManagement />)
                     break;
                 case 'Store':
@@ -262,11 +262,11 @@ import ChangePassword from './ChangePassword'
                    </div> 
                    {/* <p className="addIner blinking"></p>  */}
                    <div className="col-md-12 addIn aic" style={{ marginBottom: "10px"}} onClick={()=>authenticateUser()}><button className="fixedDisplay adjustWidth mt-15" >SUBMIT</button></div>
-                    { error!=="" ? <p className="addIner blinking alert alert-danger">{error}</p> :null} 
+                    { error!=="" ? <p className="addIner blinking alert alert-danger">{error}</p> : null} 
                    {/* onClick={()=>saveToProfileData(userInput)} */}
-                   <div className="modal-footer"><button type="button" className="btn btn-danger" onClick={()=>{this.checkShow("close")}} >Close</button>
+                   {/* <div className="modal-footer"><button type="button" className="btn btn-danger" onClick={()=>{this.checkShow("close")}} >Close</button>
                       
-                          </div>
+                          </div> */}
             </div>)
         }
 
