@@ -30,7 +30,7 @@ const ChangePassword =(props)=>{
         console.log("name",name," value ",newValue)
         setUserInput({ [name]: newValue });
         
-        setError("")
+        setError("");
     // setError({})
   };
   

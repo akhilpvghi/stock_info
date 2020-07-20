@@ -1,7 +1,7 @@
     import React, {useEffect, useState, useReducer} from 'react';
     import Menu from './Menu';
-    import StockInfo from './StockTable';
     import StockManagement from './StockManagement';
+    import Admin from './Admin';
     import axios from 'axios';
 import Store from './store';
 import AppModal from './helper/AppModal';
@@ -11,7 +11,7 @@ import ChangePassword from './ChangePassword'
 // import Cookies from 'universal-cookie';
     const Home = ()=>{
         const navbarElementsFromHome = ["Admin", "Stock Management",  "Store" ,"Change Password", "About"];
-        const[componentName,setComponentName]=useState("Stock Management");
+        const[componentName,setComponentName]=useState("Admin");
         const[component,setComponent] =  useState(null);
         const [collapsed, setCollapsed] = useState(true);
         const[stockInfodata,setStockInfodata] =  useState([]);
@@ -80,7 +80,7 @@ import ChangePassword from './ChangePassword'
                     let addHtml=[];
                      res.data.map((ele)=>{
                          let newObj={};
-                         newObj={...ele,...{"status":(<div className="add stock_table" onClick={()=>addItemInStock(ele["id"],ele["itemName"],ele["qtyMeasure"],)}>Add {ele["itemName"]}</div>),
+                         newObj={...ele,...{"status":(<div className="add stock_table" onClick={()=>addItemInStock(ele["item_id"],ele["item_name"],ele["item_unit"],)}>Add {ele["item_name"]}</div>),
                                             "lastUpdatedOn":`${ele["lastUpdatedQty"]} {${ele["lastUpdatedOn"]}}`   } }
                          addHtml=[...addHtml,newObj];
                     })
@@ -218,10 +218,11 @@ import ChangePassword from './ChangePassword'
             console.log("is it also called");
             switch (componentName) {
                 case 'Stock Management':
-                    setComponent(<StockInfo stockInfoData={stockInfodata} showModalHomeObject={showModalObject} getResponseFromChild={responseFromChild}/>)
+                    setComponent(<StockManagement stockInfoData={stockInfodata} />)
+                    // showModalHomeObject={showModalObject} getResponseFromChild={responseFromChild}
                     break;
                 case 'Admin':
-                    setComponent(<StockManagement />)
+                    setComponent(<Admin />)
                     break;
                 case 'Store':
                     if(stockInfodata.length!=0)
