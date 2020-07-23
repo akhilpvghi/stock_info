@@ -1,7 +1,5 @@
-id,itemName,qtyMeasure,currentQtyInStock,lastUpdatedOn,lastUpdatedQty,price
-1,Rice,Kg,58.0,13-07-2020,-8,80
-2,Oil,Ltr,65.0,13-07-2020,+23,56
-3,Sabzi,Kg,33.0,13-07-2020,-5,30
-4,10,Kg,80.0,13-07-2020,+60,80
-5,20,Kg,0,2020-07-13,0,2
-6,20,Kg,60.0,19-07-2020,+60,80
+s_no,item_id,item_name,item_unit,item_per_unit_price,lastUpdatedQty,lastUpdatedOn,curr_qty_in_stock,is_last_updated
+1,1,Rice,Kg,0,0,2020-07-20,0,false
+2,2,Oil,Ltr,0,0,2020-07-20,0,false
+3,1,Rice,Kg,45,34,2020-07-20,34.0,true
+4,2,Oil,Ltr,3,12,2020-07-20,12.0,true
