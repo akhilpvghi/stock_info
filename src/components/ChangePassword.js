@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect, useReducer } from 'react';
+import React, { useState, useReducer } from 'react';
 import '../styles/common.css'
 import '../styles/appModalInput.css';
 import AppModal from './helper/AppModal';

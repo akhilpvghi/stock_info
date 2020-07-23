@@ -11,7 +11,7 @@ from collections import defaultdict
 
 app = Flask(__name__, static_url_path = "/static")
 app.secret_key = 'akhilpandey'
-
+ 
 # @app.after_request
 # def after_request(response):
 #     response.headers.add('Access-Control-Allow-Origin', 'http://localhost:3000')
@@ -150,7 +150,8 @@ def updatecurrentstocktable():
             for dataFromReq in request.json['itemsToSupply']:
                 if data['item_id']==dataFromReq['item_id'] and data['item_name']==dataFromReq['item_name'] and data['is_last_updated']=="true":
                     data['curr_qty_in_stock'] = float(data['curr_qty_in_stock'])-float(dataFromReq['amountToSupply'])
-                    data['lastUpdatedOn']=dataFromReq['lastUpdatedOn']
+                    data['lastUpdatedOn'] = date.today().strftime('%m/%d/%Y')
+                    # dataFromReq['lastUpdatedOn']
                     data['lastUpdatedQty']="-"+dataFromReq['amountToSupply']
     readHeader = readData[0].keys()
     writer(readHeader, readData, filename, "update")
@@ -204,7 +205,7 @@ def addInCurrentStockTable():
                             'item_unit': dataFromReq['item_unit'],
                             'item_per_unit_price': dataFromReq['item_per_unit_price'],
                             'lastUpdatedQty': dataFromReq['lastUpdatedQty'],
-                            'lastUpdatedOn': str(date.today()), 
+                            'lastUpdatedOn': str(date.today().strftime('%m/%d/%Y')), 
                             'curr_qty_in_stock': float(data['curr_qty_in_stock'])+float(dataFromReq['lastUpdatedQty']),
                             'is_last_updated':"true"
                         }
@@ -278,7 +279,7 @@ def create_task():
         'item_unit': request.json['item_unit'],
         'item_per_unit_price': 0,
         'lastUpdatedQty': 0,
-        'lastUpdatedOn': str(date.today()),
+        'lastUpdatedOn': str(date.today().strftime('%m/%d/%Y')),
         'curr_qty_in_stock': 0,
         'is_last_updated':"true"
     }

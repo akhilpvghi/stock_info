@@ -18,18 +18,20 @@ const Store =(props)=> {
 	useEffect(() => {
 		if(props.stockInfoData.length!==0)
 		{
+			let countForLastUpdatedItem=0;
 			setStockInfoData(props.stockInfoData);
-			setElementItemLength(props.stockInfoData.length);
 			props.stockInfoData.map((ele)=>{
 				let option={};
 				let objectOfItemsForPrice = {};
 				if(ele["is_last_updated"]==="true"){
+					countForLastUpdatedItem+=1;
 				option={value:ele["item_name"],label:ele["item_name"],id:ele["id"]};
 				objectOfItemsForPrice[ele.item_name]  ="";
 				setOptionsForItems((data)=>[...data,option]);
 				setOptionsForItemsPersistent((data)=>[...data,option]);
-				}
-			})
+			}
+		})
+		setElementItemLength(countForLastUpdatedItem);
 		}
 	}, [])
 
@@ -123,20 +125,20 @@ const Store =(props)=> {
 	setItemListToSupplly(arrItemListTosuuply);
 	}
 
-	let getDate =()=>{
-		var date = new Date(); 
-		var d = date.getDate();
-		var m = date.getMonth() + 1;
-		var y = date.getFullYear();
+// 	let getDate =()=>{
+// 		var date = new Date(); 
+// 		var d = date.getDate();
+// 		var m = date.getMonth() + 1;
+// 		var y = date.getFullYear();
 
-var dateString = (d <= 9 ? '0' + d : d) + '-' + (m <= 9 ? '0' + m : m) + '-' + y;
-return dateString;
-	}
+// var dateString = (d <= 9 ? '0' + d : d) + '-' + (m <= 9 ? '0' + m : m) + '-' + y;
+// return dateString;
+// 	}
 
 	let updateRecord=()=>{
 		
 		let dataToupdateStock=[];
-		let date = getDate();
+		// let date = getDate();
 		let tempError="";
 		// setError(tempError);
 		itemListToSupplly.map((ele)=>{
@@ -160,7 +162,7 @@ return dateString;
 					newObj["item_id"]=ele.item_id;
 					newObj["item_name"]=ele.item_name;
 					newObj["item_unit"]= ele.item_unit;
-					newObj["lastUpdatedOn"]= date;
+					// newObj["lastUpdatedOn"]= date;
 					newObj["amountToSupply"]= ele.amountToSupply.toString();
 			dataToupdateStock=[...dataToupdateStock,newObj];
 		})

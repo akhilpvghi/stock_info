@@ -18,19 +18,20 @@ const StockManagement =(props)=> {
 	useEffect(() => {
 		if(props.stockInfoData.length!==0)
 		{
+			let countForLastUpdatedItem=0
 			setStockInfoData(props.stockInfoData);
-			setElementItemLength(props.stockInfoData.length);
 			props.stockInfoData.map((ele)=>{
 				let option={};
-        let objectOfItemsForPrice = {};
-        if(ele["is_last_updated"]==="true"){
-
-          option={value:ele["item_name"],label:ele["item_name"],item_id:ele["item_id"]};
-          objectOfItemsForPrice[ele.item_name]  ="";
-          setOptionsForItems((data)=>[...data,option]);
-          setOptionsForItemsPersistent((data)=>[...data,option]);
-        }
+				let objectOfItemsForPrice = {};
+				if(ele["is_last_updated"]==="true"){
+					countForLastUpdatedItem+=1;
+					option={value:ele["item_name"],label:ele["item_name"],item_id:ele["item_id"]};
+					objectOfItemsForPrice[ele.item_name]  ="";
+					setOptionsForItems((data)=>[...data,option]);
+					setOptionsForItemsPersistent((data)=>[...data,option]);
+				}
 			})
+			setElementItemLength(countForLastUpdatedItem);
 		}
 	}, [])
 
@@ -130,20 +131,20 @@ const StockManagement =(props)=> {
 	setItemListToAdd(arrItemListTosuuply);
 	}
 
-	let getDate =()=>{
-		var date = new Date(); 
-		var d = date.getDate();
-		var m = date.getMonth() + 1;
-		var y = date.getFullYear();
+// 	let getDate =()=>{
+// 		var date = new Date(); 
+// 		var d = date.getDate();
+// 		var m = date.getMonth() + 1;
+// 		var y = date.getFullYear();
 
-var dateString = (d <= 9 ? '0' + d : d) + '-' + (m <= 9 ? '0' + m : m) + '-' + y;
-return dateString;
-	}
+// var dateString = (m <= 9 ? '0' + m : m) + '/' +(d <= 9 ? '0' + d : d) + '/'  + y;
+// return dateString;
+// 	}
 
 	let updateRecord=()=>{
 		
 		let dataToupdateStock=[];
-		let date = getDate();
+		// let date = getDate();
 		let tempError="";
 		// setError(tempError);
 		itemListToAdd.map((ele)=>{
@@ -168,7 +169,7 @@ return dateString;
 					newObj["item_name"]=ele.item_name;
           newObj["item_unit"]= ele.item_unit;
           newObj["item_per_unit_price"]=ele.item_per_unit_price;
-					newObj["lastUpdatedOn"]= date;
+					// newObj["lastUpdatedOn"]= date;
 					newObj["lastUpdatedQty"]= ele.lastUpdatedQty.toString();
       dataToupdateStock=[...dataToupdateStock,newObj];
       console.log("ele error",ele["error"]);
@@ -263,13 +264,13 @@ onChange={(chosenOption)=>{
 							{/* <td><span >Updating On {new Date().toDateString()}</span></td> */}
               {/* <td><h5 data-prefix>Rs. {itemListToAdd[index]["price"]}</h5></td> */}
 							<td>
-								<input className="removeContentEditable" type="text" name="lastUpdatedQty" onChange={(evt)=>handleChange(evt,index)} placeholder={`Enter Qty in ${itemListToAdd[index]["item_unit"]}`} value= {itemListToAdd[index]["lastUpdatedQty"]}  />
+								<input className="removeContentEditable" type="text" name="lastUpdatedQty" onChange={(evt)=>handleChange(evt,index)} placeholder={`Enter Qty in ${itemListToAdd[index]["item_unit"] ? itemListToAdd[index]["item_unit"] :''}`} value= {itemListToAdd[index]["lastUpdatedQty"]}  />
 								{/* {itemListToAdd[index]["qtyMeasure"] ?`Enter in ${itemListToAdd[index]["qtyMeasure"]}`:""} */}
                 <p className="addIner blinking m-0">{itemListToAdd[index]["errorForQty"]}</p>
 								
 								</td>
               <td>
-								<input className="removeContentEditable" name="item_per_unit_price" type="text" onChange={(evt)=>handleChange(evt,index)} placeholder="Enter Price per Kg" value= {itemListToAdd[index]["item_per_unit_price"]}  />
+								<input className="removeContentEditable" name="item_per_unit_price" type="text" onChange={(evt)=>handleChange(evt,index)} placeholder={`Enter Price per ${itemListToAdd[index]["item_unit"] ? itemListToAdd[index]["item_unit"] :''}`} value= {itemListToAdd[index]["item_per_unit_price"]}  />
 								<p className="addIner blinking m-0">{itemListToAdd[index]["error"]}</p>
 								{/* {itemListToAdd[index]["qtyMeasure"] ?`Enter in ${itemListToAdd[index]["qtyMeasure"]}`:""} */}
 								</td>

@@ -1,6 +1,7 @@
     import React, {useEffect, useState, useReducer} from 'react';
     import Menu from './Menu';
     import StockManagement from './StockManagement';
+    import StockInfo from './StockInfo';
     import Admin from './Admin';
     import axios from 'axios';
 import Store from './store';
@@ -10,7 +11,7 @@ import Processing from './helper/processing';
 import ChangePassword from './ChangePassword'
 // import Cookies from 'universal-cookie';
     const Home = ()=>{
-        const navbarElementsFromHome = ["Admin", "Stock Management",  "Store" ,"Change Password", "About"];
+        const navbarElementsFromHome = ["Admin", "Stock Management",  "Store" , "Stock Info", "Change Password", "About"];
         const[componentName,setComponentName]=useState("Admin");
         const[component,setComponent] =  useState(null);
         const [collapsed, setCollapsed] = useState(true);
@@ -81,7 +82,7 @@ import ChangePassword from './ChangePassword'
                      res.data.map((ele)=>{
                          let newObj={};
                          newObj={...ele,...{"status":(<div className="add stock_table" onClick={()=>addItemInStock(ele["item_id"],ele["item_name"],ele["item_unit"],)}>Add {ele["item_name"]}</div>),
-                                            "lastUpdatedOn":`${ele["lastUpdatedQty"]} {${ele["lastUpdatedOn"]}}`   } }
+                                            "lastUpdatedOn":ele["lastUpdatedOn"]  } }
                          addHtml=[...addHtml,newObj];
                     })
                     setStockInfodata(addHtml);
@@ -224,10 +225,13 @@ import ChangePassword from './ChangePassword'
                 case 'Admin':
                     setComponent(<Admin />)
                     break;
-                case 'Store':
-                    if(stockInfodata.length!=0)
-                    setComponent(<Store stockInfoData={stockInfodata}/>)
+                case 'Stock Info':
+                    setComponent(<StockInfo stockInfoData={stockInfodata}/>)
                     break;
+                case 'Store':
+                        if(stockInfodata.length!=0)
+                        setComponent(<Store stockInfoData={stockInfodata}/>)
+                        break;
                 case 'Change Password':
                     setComponent(<ChangePassword username={userInput.username}/>)
                     break;
