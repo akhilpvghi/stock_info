@@ -155,6 +155,10 @@ tr:hover .cut { opacity: 1; }
 	font-weight: 400 !important;
 }
 
+::placeholder {
+	font-size: medium;
+}
+
 .removeContentEditable{
 	background: transparent;
 	width: -webkit-fill-available;

@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect, useReducer } from 'react';
+import React, { useState, useReducer } from 'react';
 import '../styles/common.css'
 import '../styles/appModalInput.css';
 import AppModal from './helper/AppModal';
@@ -30,7 +30,7 @@ const ChangePassword =(props)=>{
         console.log("name",name," value ",newValue)
         setUserInput({ [name]: newValue });
         
-        setError("")
+        setError("");
     // setError({})
   };
   
@@ -115,8 +115,8 @@ const ChangePassword =(props)=>{
    {/* <p className="addIner blinking">{}</p>   */}
    { error!=="" ? <p className="addIner blinking alert alert-danger">{error}</p> :null} 
   {/* onClick={()=>saveToProfileData(userInput)} */}
-  <div className="modal-footer"><button type="button" className="btn btn-danger" onClick={()=>{this.checkShow("close")}} >Close</button>
-     
+  <div className="modal-footer">
+  {/* <button type="button" className="btn btn-danger" onClick={()=>{this.checkShow("close")}} >Close</button> */}
          </div>
          </div>
          );

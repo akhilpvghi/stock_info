@@ -1,7 +1,8 @@
     import React, {useEffect, useState, useReducer} from 'react';
     import Menu from './Menu';
-    import StockInfo from './StockTable';
     import StockManagement from './StockManagement';
+    import StockInfo from './StockInfo';
+    import Admin from './Admin';
     import axios from 'axios';
 import Store from './store';
 import AppModal from './helper/AppModal';
@@ -10,8 +11,8 @@ import Processing from './helper/processing';
 import ChangePassword from './ChangePassword'
 // import Cookies from 'universal-cookie';
     const Home = ()=>{
-        const navbarElementsFromHome = ["Stock Table", "Stock Management", "Store" ,"Change Password", "About"];
-        const[componentName,setComponentName]=useState("Stock Table");
+        const navbarElementsFromHome = ["Admin", "Stock Management",  "Store" , "Stock Info", "Change Password", "About"];
+        const[componentName,setComponentName]=useState("Admin");
         const[component,setComponent] =  useState(null);
         const [collapsed, setCollapsed] = useState(true);
         const[stockInfodata,setStockInfodata] =  useState([]);
@@ -74,14 +75,14 @@ import ChangePassword from './ChangePassword'
                 }
                 )
             .then((res)=>{
-                console.log("response from stock table",res.data);
+                console.log("response from Stock Management",res.data);
                 if(res.data!=='fail'){
 
                     let addHtml=[];
                      res.data.map((ele)=>{
                          let newObj={};
-                         ele["status"]=(<div className="add">+</div>)
-                         newObj={...ele,...{"status":(<div className="add stock_table" onClick={()=>addItemInStock(ele["id"],ele["itemName"],ele["qtyMeasure"],)}>Fill Stock For {ele["itemName"]}</div>)} }
+                         newObj={...ele,...{"status":(<div className="add stock_table" onClick={()=>addItemInStock(ele["item_id"],ele["item_name"],ele["item_unit"],)}>Add {ele["item_name"]}</div>),
+                                            "lastUpdatedOn":ele["lastUpdatedOn"]  } }
                          addHtml=[...addHtml,newObj];
                     })
                     setStockInfodata(addHtml);
@@ -217,16 +218,20 @@ import ChangePassword from './ChangePassword'
         useEffect(()=>{
             console.log("is it also called");
             switch (componentName) {
-                case 'Stock Table':
-                    setComponent(<StockInfo stockInfoData={stockInfodata} showModalHomeObject={showModalObject} getResponseFromChild={responseFromChild}/>)
-                    break;
                 case 'Stock Management':
-                    setComponent(<StockManagement />)
+                    setComponent(<StockManagement stockInfoData={stockInfodata} />)
+                    // showModalHomeObject={showModalObject} getResponseFromChild={responseFromChild}
+                    break;
+                case 'Admin':
+                    setComponent(<Admin />)
+                    break;
+                case 'Stock Info':
+                    setComponent(<StockInfo stockInfoData={stockInfodata}/>)
                     break;
                 case 'Store':
-                    if(stockInfodata.length!=0)
-                    setComponent(<Store stockInfoData={stockInfodata}/>)
-                    break;
+                        if(stockInfodata.length!=0)
+                        setComponent(<Store stockInfoData={stockInfodata}/>)
+                        break;
                 case 'Change Password':
                     setComponent(<ChangePassword username={userInput.username}/>)
                     break;
@@ -262,11 +267,11 @@ import ChangePassword from './ChangePassword'
                    </div> 
                    {/* <p className="addIner blinking"></p>  */}
                    <div className="col-md-12 addIn aic" style={{ marginBottom: "10px"}} onClick={()=>authenticateUser()}><button className="fixedDisplay adjustWidth mt-15" >SUBMIT</button></div>
-                    { error!=="" ? <p className="addIner blinking alert alert-danger">{error}</p> :null} 
+                    { error!=="" ? <p className="addIner blinking alert alert-danger">{error}</p> : null} 
                    {/* onClick={()=>saveToProfileData(userInput)} */}
-                   <div className="modal-footer"><button type="button" className="btn btn-danger" onClick={()=>{this.checkShow("close")}} >Close</button>
+                   {/* <div className="modal-footer"><button type="button" className="btn btn-danger" onClick={()=>{this.checkShow("close")}} >Close</button>
                       
-                          </div>
+                          </div> */}
             </div>)
         }
 

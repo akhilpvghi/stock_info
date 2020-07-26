@@ -18,16 +18,20 @@ const Store =(props)=> {
 	useEffect(() => {
 		if(props.stockInfoData.length!==0)
 		{
+			let countForLastUpdatedItem=0;
 			setStockInfoData(props.stockInfoData);
-			setElementItemLength(props.stockInfoData.length);
 			props.stockInfoData.map((ele)=>{
 				let option={};
 				let objectOfItemsForPrice = {};
-				option={value:ele["itemName"],label:ele["itemName"],id:ele["id"]};
-				objectOfItemsForPrice[ele.itemName]  ="";
+				if(ele["is_last_updated"]==="true"){
+					countForLastUpdatedItem+=1;
+				option={value:ele["item_name"],label:ele["item_name"],id:ele["id"]};
+				objectOfItemsForPrice[ele.item_name]  ="";
 				setOptionsForItems((data)=>[...data,option]);
 				setOptionsForItemsPersistent((data)=>[...data,option]);
-			})
+			}
+		})
+		setElementItemLength(countForLastUpdatedItem);
 		}
 	}, [])
 
@@ -38,7 +42,7 @@ const Store =(props)=> {
 		let updatedOptionList=[];
 		updatedOptionList=optionsForItemsPersistent;
 		itemListToSupplly.map((selectedItems)=> {
-			updatedOptionList = updatedOptionList.filter((ele)=>selectedItems.itemName!==ele.value); 
+			updatedOptionList = updatedOptionList.filter((ele)=>selectedItems.item_name!==ele.value); 
 		})
 		setOptionsForItems(updatedOptionList);
 		setItemListToSupplly((addedItem)=>[...addedItem,{}]);
@@ -67,8 +71,8 @@ const Store =(props)=> {
 		setError("");
 		let arrToUpdate=[...itemListToSupplly];
 		stockInfoData.map((ele)=>{
-			if(ele["itemName"]===chosenOption.value ){
-				arrToUpdate[index]={ ["itemName"]: chosenOption.value, ["price"]: ele["price"],["id"]:ele["id"],["qtyMeasure"]:ele["qtyMeasure"],["amountToSupply"]:"",["currentQtyInStock"]:ele.currentQtyInStock};
+			if(ele["item_name"]===chosenOption.value ){
+				arrToUpdate[index]={ ["item_id"]:ele["item_id"],["item_name"]: chosenOption.value, ["price"]: ele["price"],["item_unit"]:ele["item_unit"],["amountToSupply"]:"",["curr_qty_in_stock"]:ele.curr_qty_in_stock,["is_last_updated"]:ele.is_last_updated};
 				
 			}
 		})
@@ -92,10 +96,10 @@ const Store =(props)=> {
 			   }
 			  else {
 				  stockInfoData.map((toCheckQty)=>{
-					  if(toCheckQty["itemName"]===arrItemListTosuuply[index]["itemName"]){
-						  if(parseFloat(toCheckQty["currentQtyInStock"])<parseFloat(evt.target.value)){
+					  if(toCheckQty["item_name"]===arrItemListTosuuply[index]["item_name"] && toCheckQty["is_last_updated"]==="true"){
+						  if(parseFloat(toCheckQty["curr_qty_in_stock"])<parseFloat(evt.target.value)){
 							setButtonDisability(true)
-							  arrItemListTosuuply[index]["error"]=`${arrItemListTosuuply[index]["itemName"]} is only ${toCheckQty["currentQtyInStock"]} ${toCheckQty["qtyMeasure"]} in Stock`;
+							  arrItemListTosuuply[index]["error"]=`${arrItemListTosuuply[index]["item_name"]} is only ${toCheckQty["curr_qty_in_stock"]} ${toCheckQty["item_unit"]} in Stock`;
 						  }
 					  }
 				  })
@@ -121,20 +125,20 @@ const Store =(props)=> {
 	setItemListToSupplly(arrItemListTosuuply);
 	}
 
-	let getDate =()=>{
-		var date = new Date(); 
-		var d = date.getDate();
-		var m = date.getMonth() + 1;
-		var y = date.getFullYear();
+// 	let getDate =()=>{
+// 		var date = new Date(); 
+// 		var d = date.getDate();
+// 		var m = date.getMonth() + 1;
+// 		var y = date.getFullYear();
 
-var dateString = (d <= 9 ? '0' + d : d) + '-' + (m <= 9 ? '0' + m : m) + '-' + y;
-return dateString;
-	}
+// var dateString = (d <= 9 ? '0' + d : d) + '-' + (m <= 9 ? '0' + m : m) + '-' + y;
+// return dateString;
+// 	}
 
 	let updateRecord=()=>{
 		
 		let dataToupdateStock=[];
-		let date = getDate();
+		// let date = getDate();
 		let tempError="";
 		// setError(tempError);
 		itemListToSupplly.map((ele)=>{
@@ -155,10 +159,10 @@ return dateString;
 					}catch{
 					}
 					
-					newObj["id"]=ele.id;
-					newObj["itemName"]=ele.itemName;
-					newObj["qtyMeasure"]= ele.qtyMeasure;
-					newObj["lastUpdatedOn"]= date;
+					newObj["item_id"]=ele.item_id;
+					newObj["item_name"]=ele.item_name;
+					newObj["item_unit"]= ele.item_unit;
+					// newObj["lastUpdatedOn"]= date;
 					newObj["amountToSupply"]= ele.amountToSupply.toString();
 			dataToupdateStock=[...dataToupdateStock,newObj];
 		})
@@ -223,9 +227,9 @@ let content =(
 					<tr>
 						<th><span >Item</span></th>
 						<th><span >Description</span></th>
-						<th><span >Rate</span></th>
+						<th><span >Current Qty In Stock</span></th>
 						<th><span >Quantity</span></th>
-						<th><span >Price</span></th>
+						{/* <th><span >Price</span></th> */}
 					</tr>
 				</thead>
 				<tbody>
@@ -236,7 +240,7 @@ let content =(
 //   className="adjustWidthForMultiSelect"
 name="itemList"
 placeholder="Select Units"
-value={{value: itemListToSupplly[index]["itemName"],label:itemListToSupplly[index]["itemName"]}}
+value={{value: itemListToSupplly[index]["item_name"],label:itemListToSupplly[index]["item_name"]}}
 options={optionsForItems}
 onChange={(chosenOption)=>{	
 	// handleChange()
@@ -246,13 +250,13 @@ onChange={(chosenOption)=>{
 />
 </td>
 							<td><span >Updating On {new Date().toDateString()}</span></td>
-							<td><h5 data-prefix>Rs. {itemListToSupplly[index]["price"]}</h5></td>
+							<td><h5 data-prefix> {itemListToSupplly[index]["curr_qty_in_stock"]} {itemListToSupplly[index]["item_unit"]}</h5></td>
 							<td>
-								<input className="removeContentEditable" type="text" onChange={(evt)=>handleChange(evt,index)} placeholder={itemListToSupplly[index]["qtyMeasure"] ?`Enter in ${itemListToSupplly[index]["qtyMeasure"]}`:""} value= {itemListToSupplly[index]["amountToSupply"]}  />
+								<input className="removeContentEditable" type="text" onChange={(evt)=>handleChange(evt,index)} placeholder={itemListToSupplly[index]["item_unit"] ?`Enter in ${itemListToSupplly[index]["item_unit"]}`:""} value= {itemListToSupplly[index]["amountToSupply"]}  />
 								<p className="addIner blinking m-0">{itemListToSupplly[index]["error"]}</p>
 								
 								</td>
-							<td><span data-prefix></span><h5> {itemListToSupplly[index]["itemTotalPrice"] ?`Rs ${itemListToSupplly[index]["itemTotalPrice"]}` : "Enter Valid Qty"}</h5></td>
+							{/* <td><span data-prefix></span><h5> {itemListToSupplly[index]["itemTotalPrice"] ?`Rs ${itemListToSupplly[index]["itemTotalPrice"]}` : "Enter Valid Qty"}</h5></td> */}
 						</tr>)
 					})}
 					
@@ -260,10 +264,10 @@ onChange={(chosenOption)=>{
 			</table>
 			{elementItemLength!==1 ? <div className="add" onClick={()=>addMoreItemToSupply()}>+</div> :null}
 			<table className="balance">
-				<tr>
+				{/* <tr>
 					<th><span >Total</span></th>
 					<td><h5 data-prefix>Rs. {totalAmount}</h5></td>
-				</tr>
+				</tr> */}
 				
 			</table>
 			

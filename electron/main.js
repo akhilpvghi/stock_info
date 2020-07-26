@@ -9,10 +9,13 @@ function createWindow () {
     protocol: 'file:',
     slashes: true,
   });
-  mainWindow = new BrowserWindow({ width: 1024, height: 768, webPreferences: {
+  mainWindow = new BrowserWindow({ 
+    show: false,
+    width: 1024, height: 768, webPreferences: {
     preload: path.join(__dirname, 'preload.js'),
   } });
   mainWindow.loadURL(startUrl);
+  mainWindow.maximize();
   mainWindow.on('closed', function () {
     mainWindow = null;
   });

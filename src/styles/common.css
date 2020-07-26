@@ -22,6 +22,12 @@
     bottom: 33em; 
 }
 
+.resizer {
+  z-index: 0000 !important;
+} 
+
+/* above resizer as it was overlapping calendar  */
+
 
 
 
