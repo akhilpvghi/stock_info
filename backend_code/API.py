@@ -144,15 +144,41 @@ def get_tasks():
 @login_required
 def updatecurrentstocktable():
     filename = "currentstocktable.csv"
+    updateCurrentQty=0
+    updatePerUnitPrice = 0
+    prevSno = 0
+    tempDataDict = {}
     with open(filename, newline= "") as file:
         readData = [row for row in csv.DictReader(file)]
         for data in readData:
             for dataFromReq in request.json['itemsToSupply']:
                 if data['item_id']==dataFromReq['item_id'] and data['item_name']==dataFromReq['item_name'] and data['is_last_updated']=="true":
-                    data['curr_qty_in_stock'] = float(data['curr_qty_in_stock'])-float(dataFromReq['amountToSupply'])
+                    prevSno = int(data['s_no'])
                     data['lastUpdatedOn'] = date.today().strftime('%m/%d/%Y')
+                    tempDataDict = data
+                    if data['action']!="reduced":
+                        while tempDataDict['action']!="reduced" and tempDataDict['item_id']==dataFromReq['item_id'] and tempDataDict['item_name']==dataFromReq['item_name'] and tempDataDict['s_no']!='1' and tempDataDict['item_per_unit_price']!='0' and tempDataDict['lastUpdatedQty']!='0':
+                            for tempData in readData:
+                                if tempData['s_no'] == str(prevSno) and tempData['item_id']==dataFromReq['item_id'] and tempData['item_name']==dataFromReq['item_name']:
+                                    # updateCurrentQty = float(tempData['curr_qty_in_stock'])-float(dataFromReq['amountToSupply'])
+                                    if tempData['action']=="reduced":
+                                        updatePerUnitPrice += float(tempData['item_per_unit_price'])*float(tempData['curr_qty_in_stock'])
+                                    else:
+                                        updatePerUnitPrice += float(tempData['item_per_unit_price'])*float(tempData['lastUpdatedQty'])
+                                    print("check=========>updatePerUnitPrice {} prevSno {}".format(updatePerUnitPrice,prevSno))
+                                    tempDataDict = tempData
+                            print(" tempDataDict['s_no'] {} tempData['s_no'] {}".format(tempDataDict['s_no'],tempData['s_no']))
+                            prevSno-=1
+                        # if tempDataDict['action']=="reduced" and tempDataDict['item_id']==dataFromReq['item_id'] and tempDataDict['item_name']==dataFromReq['item_name']:
+                        #     updatePerUnitPrice += float(tempDataDict['item_per_unit_price'])*float(tempDataDict['curr_qty_in_stock'])
+                        #     print("check========found reduced")
+                        updatePerUnitPrice=updatePerUnitPrice/float(data['curr_qty_in_stock'])
+                        data['item_per_unit_price'] = updatePerUnitPrice
+                    data['curr_qty_in_stock'] = float(data['curr_qty_in_stock'])-float(dataFromReq['amountToSupply'])
+                    data['lastUpdatedQty']=dataFromReq['amountToSupply']
+                    data['action']="reduced"
+                        
                     # dataFromReq['lastUpdatedOn']
-                    data['lastUpdatedQty']="-"+dataFromReq['amountToSupply']
     readHeader = readData[0].keys()
     writer(readHeader, readData, filename, "update")
     file.close()
@@ -161,17 +187,17 @@ def updatecurrentstocktable():
 
 def updateIt(dataImp,dataToBeAppended):
     filename = "currentstocktable.csv"
-    headerForCurrentStock = ("s_no","item_id","item_name","item_unit","item_per_unit_price","lastUpdatedQty","lastUpdatedOn","curr_qty_in_stock","is_last_updated")
+    headerForCurrentStock = ("s_no","item_id","item_name","item_unit","item_per_unit_price","lastUpdatedQty","action","lastUpdatedOn","curr_qty_in_stock","is_last_updated")
     files = open(filename, "r")
     idForCurrentStock=0
     line=files.readlines()
     idForCurrentStock=len(line)
     files.seek(0)
     files.close()
-    print("dataImp dataImp {}".format(dataImp))
+    # print("dataImp dataImp {}".format(dataImp))
     for data in dataToBeAppended:
         data["s_no"]= idForCurrentStock
-        print("dataTobeApppw {}",format(data))
+        # print("dataTobeApppw {}",format(data))
         writer(headerForCurrentStock, data, filename, "append")
         idForCurrentStock+=1
     return jsonify( { 'status': 'done' } ), 201
@@ -179,7 +205,7 @@ def updateIt(dataImp,dataToBeAppended):
 @app.route('/addInCurrentStockTable', methods = ['PUT'])
 @login_required
 def addInCurrentStockTable():
-    headerForCurrentStock = ("s_no","item_id","item_name","item_unit","item_per_unit_price","lastUpdatedQty","lastUpdatedOn","curr_qty_in_stock","is_last_updated")
+    headerForCurrentStock = ("s_no","item_id","item_name","item_unit","item_per_unit_price","lastUpdatedQty","action","lastUpdatedOn","curr_qty_in_stock","is_last_updated")
   
     filename = "currentstocktable.csv"
     dataImp=request.json['items_to_add']
@@ -207,6 +233,7 @@ def addInCurrentStockTable():
                             'lastUpdatedQty': dataFromReq['lastUpdatedQty'],
                             'lastUpdatedOn': str(date.today().strftime('%m/%d/%Y')), 
                             'curr_qty_in_stock': float(data['curr_qty_in_stock'])+float(dataFromReq['lastUpdatedQty']),
+                            'action': "added",
                             'is_last_updated':"true"
                         }
                         dataToBeAppended.append(dataForCurrentStock)
@@ -250,7 +277,7 @@ def create_task():
         # readData = [row for row in csv.DictReader(file)]
         # readHeader = readData[0].keys()
     headerForStockManagement = ("s_no","item_id", "item_name", "item_unit")
-    headerForCurrentStock = ("s_no","item_id","item_name","item_unit","item_per_unit_price","lastUpdatedQty","lastUpdatedOn","curr_qty_in_stock","is_last_updated")
+    headerForCurrentStock = ("s_no","item_id","item_name","item_unit","item_per_unit_price","lastUpdatedQty","action","lastUpdatedOn","curr_qty_in_stock","is_last_updated")
     
     f = open(filenameForStockManagement, "r")
     idForStockManagement=0
@@ -279,6 +306,7 @@ def create_task():
         'item_unit': request.json['item_unit'],
         'item_per_unit_price': 0,
         'lastUpdatedQty': 0,
+        'action': "added",
         'lastUpdatedOn': str(date.today().strftime('%m/%d/%Y')),
         'curr_qty_in_stock': 0,
         'is_last_updated':"true"

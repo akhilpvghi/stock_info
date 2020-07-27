@@ -11,7 +11,7 @@ import Processing from './helper/processing';
 import ChangePassword from './ChangePassword'
 // import Cookies from 'universal-cookie';
     const Home = ()=>{
-        const navbarElementsFromHome = ["Admin", "Stock Management",  "Store" , "Stock Info", "Change Password", "About"];
+        const navbarElementsFromHome = ["Admin", "Stock Management",  "Stock Info","Store" , "About"];
         const[componentName,setComponentName]=useState("Admin");
         const[component,setComponent] =  useState(null);
         const [collapsed, setCollapsed] = useState(true);
@@ -126,12 +126,16 @@ import ChangePassword from './ChangePassword'
 
             let responseFromChild=(isRefreshRequire)=>{
 
-                setShowModalObject({...showModalObject,...{"status":null}});
-                if(isRefreshRequire){
-
-                    window.location.reload(false);
-                    // getStockTableData()
+                if(isRefreshRequire.includes("chanePassword")){
+                    setComponent(<ChangePassword username={userInput.username}/>)
+                    setComponentName("Change Password");
                 }
+                // setShowModalObject({...showModalObject,...{"status":null}});
+                // if(isRefreshRequire){
+
+                //     window.location.reload(false);
+                //     // getStockTableData()
+                // }
                 // setIsAuthenticated(true)
                 console.log("child called in parent",isRefreshRequire);
             }
@@ -223,7 +227,7 @@ import ChangePassword from './ChangePassword'
                     // showModalHomeObject={showModalObject} getResponseFromChild={responseFromChild}
                     break;
                 case 'Admin':
-                    setComponent(<Admin />)
+                    setComponent(<Admin getResponseFromChild={responseFromChild}/>)
                     break;
                 case 'Stock Info':
                     setComponent(<StockInfo stockInfoData={stockInfodata}/>)

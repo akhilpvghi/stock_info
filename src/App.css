@@ -25,6 +25,12 @@
   color: white;
 }
 
+.oneMoreFlex {
+  display: flex;
+  justify-content: center;
+  width: inherit;
+}
+
 .App-link {
   color: #61dafb;
 }
@@ -48,6 +54,8 @@
   display: flex;
   flex-direction: column;
   align-items: center;
+  width: -webkit-fill-available; 
+  /* to extend div in admin */
 }
 
 .add.stock_table{

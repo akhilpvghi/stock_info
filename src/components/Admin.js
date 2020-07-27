@@ -141,7 +141,7 @@ function Table({ columns, data }) {
   
   
   
-  const Admin =()=>{
+  const Admin =(props)=>{
     const[data,setData] =  useState([]);
     const[columns,setColumns] =  useState([]);
     const [showModal, setShowModal] = useState({status: ""});
@@ -352,6 +352,10 @@ onChange={(chosenOption)=>{
 
     </div>);
 
+    let setChangePasswordCompo=()=>{
+      props.getResponseFromChild('chanePassword');
+    }
+
 let failureModal = (message)=>(<div className="modal-header">
 <h4 className="modal-title alert alert-danger">Some Error Occurred!!</h4>
 <div className="primary fa fa-times-circle fa-2x cursrPointer btn btn-warning" onClick={()=>
@@ -370,13 +374,17 @@ let content = (
     <div className="card bg-primary mainContent">
     {/* <h1>Home</h1> */}
 
-    <div className="toSetAtRightCorner">
-    <div className="add forMgmt" onClick={()=>setShowModal({status: "createData"})}>Add Item +</div>
-    </div>
     {/* onClick={} */}
+    <div className="oneMoreFlex">
     <Styles>
       <Table columns={columns} data={data} />
     </Styles>
+    <div className="toSetAtRightCorner">
+    <div className="add forMgmt" onClick={()=>setShowModal({status: "createData"})}>Add Item +</div>
+    <div className="add forMgmt" onClick={()=>setChangePasswordCompo()}>Change Password</div>
+    {/* onClick={()=>setShowModal({status: "createData"})} */}
+    </div>
+    </div>
     {showModal.status=="createData" ?  (
         <AppModal componentToLoad={internalInputCompo} ></AppModal>
     ) :null}

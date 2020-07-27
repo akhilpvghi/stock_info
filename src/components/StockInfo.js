@@ -137,7 +137,7 @@ function Table({ columns, data }) {
 
 const StockInfo =(props)=> {
 
-    const [startDate, setStartDate] = useState(new Date())
+    const [startDate, setStartDate] = useState()
     const [stockInfoData, setStockInfoData] = useState([])
     const [tableData, setTableData] = useState([])
     const[columns,setColumns] =  useState([]);
@@ -178,13 +178,21 @@ return dateString;
                            </span>
                          ),
                        accessor: "item_name",
-                },{
+                },
+                {
                     Header: () => (
                               <span>
                                <h4>Price</h4>
                               </span>
                             ),
                           accessor: "item_per_unit_price",
+                   },{
+                    Header: () => (
+                              <span>
+                               <h4>Last Updated Qty</h4>
+                              </span>
+                            ),
+                          accessor: "lastUpdatedQty",
                    },
                 
                 {
