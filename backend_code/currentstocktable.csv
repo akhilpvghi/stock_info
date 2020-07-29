@@ -110,5 +110,5 @@ s_no,item_id,item_name,item_unit,item_per_unit_price,lastUpdatedQty,action,lastU
 109,1,Rice,Kg,8,8,added,07/29/2020,479.0,false
 110,2,Oil,Ltr,3,5,added,07/29/2020,433.0,false
 111,1,Rice,Kg,2,5,added,07/29/2020,484.0,false
-112,2,Oil,Ltr,34.0,436.0,reduced,07/29/2020,436.0,true
-113,1,Rice,Kg,15.0,500.0,reduced,07/29/2020,500.0,true
+112,2,Oil,Ltr,34.0,405.0,reduced,07/29/2020,405.0,true
+113,1,Rice,Kg,15.0,460.0,reduced,07/29/2020,460.0,true

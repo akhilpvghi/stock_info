@@ -129,6 +129,8 @@ import ChangePassword from './ChangePassword'
                 if(isRefreshRequire.includes("chanePassword")){
                     setComponent(<ChangePassword username={userInput.username}/>)
                     setComponentName("Change Password");
+                }else if(isRefreshRequire.includes("updateStockData")){
+                    getStockTableData();
                 }
                 // setShowModalObject({...showModalObject,...{"status":null}});
                 // if(isRefreshRequire){
@@ -223,7 +225,7 @@ import ChangePassword from './ChangePassword'
             console.log("is it also called");
             switch (componentName) {
                 case 'Stock Management':
-                    setComponent(<StockManagement stockInfoData={stockInfodata} />)
+                    setComponent(<StockManagement stockInfoData={stockInfodata} getResponseFromChild={responseFromChild}/>)
                     // showModalHomeObject={showModalObject} getResponseFromChild={responseFromChild}
                     break;
                 case 'Admin':
@@ -234,7 +236,7 @@ import ChangePassword from './ChangePassword'
                     break;
                 case 'Store':
                         if(stockInfodata.length!=0)
-                        setComponent(<Store stockInfoData={stockInfodata}/>)
+                        setComponent(<Store stockInfoData={stockInfodata} getResponseFromChild={responseFromChild}/>)
                         break;
                 case 'Change Password':
                     setComponent(<ChangePassword username={userInput.username}/>)

@@ -36,6 +36,10 @@ const StockManagement =(props)=> {
 		}
 	}, [])
 
+	let updateToHome=()=>{
+		props.getResponseFromChild('updateStockData');
+	  }
+
 	let addMoreItemToSupply=()=>{
 		let itemLengthOnScreen=elementItemLength;
 		itemLengthOnScreen-=1;
@@ -217,6 +221,7 @@ const StockManagement =(props)=> {
 
 					setDataProcessedList(filtered);
 					setDatasendingStatus({"status":"done"});
+					updateToHome()
 					// setItemListToAdd([{"lastUpdatedQty":"",
 					// "item_per_unit_price":""}]);
 					// setTotalAmount(0);
@@ -237,15 +242,20 @@ const StockManagement =(props)=> {
 		}
 	}
 
-	let succesOfModal = (message)=>(<div className="modal-header">
+	let succesOfModal = (message)=>(<div className="modal-header padd0 alert-info">
 		{
 			dataProcessedList.map((ele)=>{
 				return(
+					<div class="alert alert-warning" role="alert">
+  {/* This is a primary alert—check it out! */}
+  {ele['item_name']} is {ele['curr_qty_in_stock']} {ele['item_unit']} in Stock
+</div>
 
-					<h4 className="modal-title alert alert-success">{ele['item_name']} {ele['curr_qty_in_stock']}</h4>
+					// <h4 >{ele['item_name']} is {ele['curr_qty_in_stock']} {ele['item_unit']} in Stock</h4>
 				)
 			})
 		}
+{/* <h4 className="modal-title alert alert-success">Successfully Updated!!!</h4> */}
     {/* <h4 className="modal-title alert alert-success">Successfully Updated!!!</h4> */}
    <div className="primary fa fa-times-circle fa-2x cursrPointer btn btn-primary" onClick={()=>
    {
@@ -253,7 +263,7 @@ const StockManagement =(props)=> {
 	// window.location.reload(false)
   }}>
     
-    OK</div>
+	Successfully Updated!!! OK</div>
 	</div>)
 
 let failureModal = (message)=>(<div className="modal-header">

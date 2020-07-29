@@ -228,7 +228,7 @@ def updatecurrentstocktable():
     readHeader = readData[0].keys()
     writer(readHeader, readData, filename, "update")
     file.close()
-    return jsonify( { 'status': 'done' } ), 201
+    return get_task(), 201
 
 
 def updateIt(dataImp,dataToBeAppended):

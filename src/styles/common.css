@@ -238,6 +238,9 @@ height: 180px;
 .modal-header {
  
   align-items: center !important;
+  /* display: flex;
+    flex-direction: column; */
+/* as display when updating list  removed*/
 }
 
 /* above solves problem in modal header button allignment */
