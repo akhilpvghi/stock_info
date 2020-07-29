@@ -5,7 +5,10 @@ import '../styles/stockInfo.css';
 import "react-datepicker/dist/react-datepicker.css";
 import styled from 'styled-components'
 import { useTable, useBlockLayout, useResizeColumns, usePagination } from 'react-table'
-
+import axios from 'axios';
+import AppModal from './helper/AppModal';
+import Processing from './helper/processing';
+import GetSortOrder from './helper/getSorting';
 
 const Styles = styled.div`
   padding: 1rem;
@@ -138,10 +141,11 @@ function Table({ columns, data }) {
 const StockInfo =(props)=> {
 
     const [startDate, setStartDate] = useState()
-    const [stockInfoData, setStockInfoData] = useState([])
+    // const [stockInfoData, setStockInfoData] = useState([])
+    const [dataSendingStatus, setDataSendingStatus] = useState({"status":null})
     const [tableData, setTableData] = useState([])
     const[columns,setColumns] =  useState([]);
-
+    const [totalAmount, setTotalAmount] = useState(0);
 
     let getDate =(dateChng)=>{
 		var date = new Date(dateChng); 
@@ -156,22 +160,73 @@ return dateString;
 
 
     let handleChange=(date)=>{
+      let price =0;
+      let modifyData=[];
         console.log(getDate(date));
         setStartDate(date)
-        setTableData(stockInfoData.filter((ele)=>{
-            return ele.lastUpdatedOn===getDate(date)
-        }))
+        setDataSendingStatus({"status":"processing"});
+        let config = {
+          method: 'get',
+          url: `/getDataByDate?date_to_check=${getDate(date)}`,
+          withCredentials: true,
+        };
+        axios(config)
+        .then((res)=>{
+          console.log("res.data stockklinfo",res.data);
+          if(res.data.length!==0){
+            modifyData =res.data.sort(GetSortOrder("s_no",true));
+            modifyData =modifyData.sort(GetSortOrder("item_name",false));
+            // GetSortOrder()
+            
+            // res.data.sort(function (a, b) {
+            //   return a.s_no.localeCompare((b['s_no']));
+          //   modifyData.sort(function(a, b) {
+          //       return parseInt(a.item_name) < parseInt(b.item_name);
+            
+          // })
+            setTableData(modifyData)
+            setDataSendingStatus({"status":null}); 
+            res.data.map((ele)=>{
+              if(ele['action'].includes("reduced")){
+
+                price+=ele['item_per_unit_price']*ele['curr_qty_in_stock']
+              }
+              else{
+                price+=ele['item_per_unit_price']*ele['lastUpdatedQty']
+
+              }
+            })
+            setTotalAmount(price);
+          }else{
+            setTableData([])
+            setTotalAmount(0);
+
+            setDataSendingStatus({"status":"noRecord"}); 
+          }
+          
+        })
+        .catch((err)=>{
+          setDataSendingStatus({"status":"error"}); 
+
+    })
+        // setTableData(stockInfoData.filter((ele)=>{
+        //     return ele.lastUpdatedOn===getDate(date)
+        // }))
+
+
 
         
 
-           let dataEle=[{
-            Header: () => (
-                      <span>
-                       <h4>SNo.</h4>
-                      </span>
-                    ),
-                  accessor: "s_no",
-                },{
+           let dataEle=[
+            //  {
+            // Header: () => (
+            //           <span>
+            //            <h4>SNo.</h4>
+            //           </span>
+            //         ),
+            //       accessor: "s_no",
+            //     },
+                {
                  Header: () => (
                            <span>
                             <h4>Item Name</h4>
@@ -195,32 +250,56 @@ return dateString;
                           accessor: "lastUpdatedQty",
                    },
                 
-                {
-                    Header: () => (
-                              <span>
-                               <h4>Last Updated On</h4>
-                              </span>
-                            ),
-                          accessor: "lastUpdatedOn",
-                   },{
-           
-            Header: () => (
-                      <span>
+                   {
+                     
+                     Header: () => (
+                       <span>
                        <h4>Current Qty in Stock</h4>
                       </span>
                     ),
-                  accessor: "curr_qty_in_stock"}]
+                    accessor: "curr_qty_in_stock"},
+                             {
+                                 Header: () => (
+                                           <span>
+                                            <h4>Last Updated On</h4>
+                                           </span>
+                                         ),
+                                       accessor: "lastUpdatedOn",
+                                },
+                
+                ]
 
                   setColumns(dataEle);
 
     }
 
-    useEffect(() => {
-        if(props.stockInfoData.length!==0){
-            console.log("props in stockInfo Naew==>",props.stockInfoData)
-            setStockInfoData(props.stockInfoData)
-        }
-    }, [props.stockInfoData])
+    
+
+let failureModal = ()=>(<div className="modal-header">
+<h4 className="modal-title alert alert-danger">Some Error Occurred!!</h4>
+<div className="primary fa fa-times-circle fa-2x cursrPointer btn btn-warning" onClick={()=>
+{
+   setDataSendingStatus({"status":null})
+}}>
+
+OK</div>
+</div>)
+
+let succesOfModal = ()=>(<div className="modal-header">
+    <h4 className="modal-title alert alert-success">No Records Found!!</h4>
+   <div className="primary fa fa-times-circle fa-2x cursrPointer btn btn-primary" onClick={()=>
+   {
+	   setDataSendingStatus({"status":null})
+  }}>
+    
+    OK</div>
+	</div>)
+    // useEffect(() => {
+    //     if(props.stockInfoData.length!==0){
+    //         console.log("props in stockInfo Naew==>",props.stockInfoData)
+    //         setStockInfoData(props.stockInfoData)
+    //     }
+    // }, [props.stockInfoData])
 
     let content = (<div className="card bg-primary mainContent">
         <div className="stockInfoNew">
@@ -236,6 +315,22 @@ return dateString;
         <Styles>
       <Table columns={columns} data={tableData} />
     </Styles>
+    <table className="balance">
+				<tr>
+					<th><span >Total</span></th>
+					<td><h5 data-prefix>Rs. {totalAmount}</h5></td>
+				</tr>
+				
+			</table>
+    {dataSendingStatus.status==="processing" ?  (
+         <AppModal componentToLoad={<Processing></Processing>} ></AppModal>
+	) :null}
+	{dataSendingStatus.status==="error" ?  (
+         <AppModal componentToLoad={failureModal} ></AppModal>
+    ) :null}
+    {dataSendingStatus.status==="noRecord" ?  (
+         <AppModal componentToLoad={succesOfModal} ></AppModal>
+    ) :null}
         </div>
     </div> )
 

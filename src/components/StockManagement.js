@@ -2,7 +2,7 @@ import React, {useEffect, useState, useRef} from 'react';
 import '../styles/store.css'
 import Select from "react-select";
 import axios from 'axios';
-import AppModal from './helper/AppModal'
+import AppModal from './helper/AppModal';
 import Processing from './helper/processing';
 
 const StockManagement =(props)=> {
@@ -15,6 +15,7 @@ const StockManagement =(props)=> {
 	const [error, setError] = useState("");
 	const [elementItemLength, setElementItemLength] = useState(0);
 	const [buttonDisability, setButtonDisability] = useState(true)
+	const [dataProcessedList, setDataProcessedList] = useState([])
 	useEffect(() => {
 		if(props.stockInfoData.length!==0)
 		{
@@ -146,6 +147,8 @@ const StockManagement =(props)=> {
 		let dataToupdateStock=[];
 		// let date = getDate();
 		let tempError="";
+
+		let filtered =[];
 		// setError(tempError);
 		itemListToAdd.map((ele)=>{
 			let newObj={};
@@ -188,8 +191,45 @@ const StockManagement =(props)=> {
 					  };
 			axios(config)
 			.then((res)=>{
-				if(res.data.length!=0)
-				setDatasendingStatus({"status":"done"});
+				if(res.data.length!==0)
+				{
+					//  filtered = res.data.filter(item =>        // filter jsondata
+					// 	dataToupdateStock.every( f =>                // so every member of filter array
+					// 		 f.value.includes(item[f.item_name])) )
+
+					// res.data.map((el)=>{
+					// 	let option={value:el["item_name"],label:el["item_name"],item_id:el["item_id"]};
+						
+					// 	// const returnedTarget = Object.assign({},(data)=>{...data,...option});
+					// 	let data = (data)=>[...data,option]
+					// 	setOptionsForItems(data);
+					// })
+					const filtered = res.data.filter((el) => {
+						
+						return dataToupdateStock.some((f) => {
+						  return f.item_name === el.item_name && f.item_id === el.item_id;
+						});
+					  });
+
+					  
+
+					console.log("filtered filtered",filtered)
+
+					setDataProcessedList(filtered);
+					setDatasendingStatus({"status":"done"});
+					// setItemListToAdd([{"lastUpdatedQty":"",
+					// "item_per_unit_price":""}]);
+					// setTotalAmount(0);
+					// setStockInfoData(res.data);
+					// dataToupdateStock.map((ele,index)=>{
+						
+					// 	reduceItemToSupply(ele,index)
+					// })
+					setItemListToAdd([{"lastUpdatedQty":"",
+					 "item_per_unit_price":""}])
+					 setOptionsForItems(optionsForItemsPersistent)
+					setElementItemLength(optionsForItemsPersistent.length);
+				}
 			}).catch((err)=>{
 				setDatasendingStatus({"status":"error"});
 				console.log("errr===================>",err);
@@ -198,11 +238,19 @@ const StockManagement =(props)=> {
 	}
 
 	let succesOfModal = (message)=>(<div className="modal-header">
-    <h4 className="modal-title alert alert-success">Successfully Updated!!!</h4>
+		{
+			dataProcessedList.map((ele)=>{
+				return(
+
+					<h4 className="modal-title alert alert-success">{ele['item_name']} {ele['curr_qty_in_stock']}</h4>
+				)
+			})
+		}
+    {/* <h4 className="modal-title alert alert-success">Successfully Updated!!!</h4> */}
    <div className="primary fa fa-times-circle fa-2x cursrPointer btn btn-primary" onClick={()=>
    {
 	   setDatasendingStatus({"status":null})
-	window.location.reload(false)
+	// window.location.reload(false)
   }}>
     
     OK</div>

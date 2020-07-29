@@ -180,7 +180,7 @@ const Store =(props)=> {
 					  };
 			axios(config)
 			.then((res)=>{
-				if(res.data.length!=0)
+				if(res.data['status']=='done')
 				setDatasendingStatus({"status":"done"});
 			}).catch((err)=>{
 				setDatasendingStatus({"status":"error"});

@@ -76,7 +76,7 @@ import ChangePassword from './ChangePassword'
                 )
             .then((res)=>{
                 console.log("response from Stock Management",res.data);
-                if(res.data!=='fail'){
+                if(res.data!=='fail' && res.data.length!==0){
 
                     let addHtml=[];
                      res.data.map((ele)=>{
