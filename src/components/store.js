@@ -154,7 +154,7 @@ let updateToHome=()=>{
 						ele.amountToSupply
 						))
 						{
-							tempError="Provided Qty/Amt. can't be proceeded!! Please Check and try Again!!";
+							tempError="Provided Qty/Amt. can't be processed!! Please Check and try Again!!";
 							setError(tempError);
 							return "";
 							
@@ -201,6 +201,7 @@ let updateToHome=()=>{
 					setDataProcessedList(filtered);
 					setDatasendingStatus({"status":"done"});
 					updateToHome();
+					setStockInfoData(res.data);
 					setItemListToSupplly([{"amountToSupply":""}])
 					 setOptionsForItems(optionsForItemsPersistent)
 					setElementItemLength(optionsForItemsPersistent.length);

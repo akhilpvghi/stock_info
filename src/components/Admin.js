@@ -192,6 +192,8 @@ function Table({ columns, data }) {
     axios(config)
     .then((res)=>{
         console.log("response from stock table",res.data);
+        if(res.data.length!==0){
+
         res.data.map((ele) => {
             // setData([]);
             setData((dataRecord)=>[...dataRecord,ele]);
@@ -230,11 +232,12 @@ function Table({ columns, data }) {
                         ),
                       accessor: "item_unit"}];
                setColumns(dataEle)
-        })
+        })}
     })
     .catch((err)=>{
         console.log("error",err);
     })
+  
     
   }, [])
 
@@ -385,13 +388,13 @@ let content = (
     {/* onClick={()=>setShowModal({status: "createData"})} */}
     </div>
     </div>
-    {showModal.status=="createData" ?  (
+    {showModal.status==="createData" ?  (
         <AppModal componentToLoad={internalInputCompo} ></AppModal>
     ) :null}
-    {showModal.status=="processing" ?  (
+    {showModal.status==="processing" ?  (
         <AppModal componentToLoad={<Processing></Processing>} ></AppModal>
     ) :null}
-    {showModal.status=="done" ?  (
+    {showModal.status==="done" ?  (
         <AppModal componentToLoad={succesOfModal} ></AppModal>
     ) :null}
     {showModal.status==="error" ?  (

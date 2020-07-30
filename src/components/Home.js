@@ -76,8 +76,8 @@ import ChangePassword from './ChangePassword'
                 )
             .then((res)=>{
                 console.log("response from Stock Management",res.data);
-                if(res.data!=='fail' && res.data.length!==0){
-
+                if(res.data!=='fail' ){
+                    // && res.data.length!==0 //we dont want to authenticate fail if tehre is nothing in stock
                     let addHtml=[];
                      res.data.map((ele)=>{
                          let newObj={};

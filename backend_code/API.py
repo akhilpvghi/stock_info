@@ -3,6 +3,7 @@
 from flask import Flask, jsonify, abort, request, make_response, url_for,session
 from flask_cors import CORS, cross_origin
 from werkzeug.security import generate_password_hash, check_password_hash
+from werkzeug.http import dump_cookie
 # from flask_httpauth import HTTPBasicAuth
 import csv
 from datetime import date
@@ -69,6 +70,19 @@ def after_request(response):
     response.headers.add('Access-Control-Allow-Headers', 'Content-Type,Authorization')
     response.headers.add('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,OPTIONS')
     response.headers.add('Access-Control-Allow-Credentials', 'true')
+    # response.set_cookie('name', 'World', secure=True,samesite=None)
+    # response.headers.add('Set-Cookie','cross-site-cookie=bar; SameSite=None;')
+    response.headers.add('Set-Cookie','cross-site-cookie=bar; SameSite=None; Secure')
+    # response.set_cookie('somekey', 'someval', domain='127.0.0.1', samesite=None,secure=True)
+    # cookie = dump_cookie(*args, **kwargs)
+
+    # if 'samesite' in kwargs and kwargs['samesite'] is None:
+    #     cookie = "{}; {}".format(cookie, b'SameSite=None'.decode('latin1'))
+    # response.headers.add(
+    #     'Set-Cookie',
+    #     cookie
+    # )
+    # response.headers.add('Set-Cookie','cross-site-cookie=bar; SameSite=None; Secure')
     # response.headers.add('cookie','SameSite=None')
     # response.headers.add('Set-Cookie', 'access_token_cookie=bar; SameSite="Lax"; ')
   return response
@@ -158,9 +172,9 @@ def filter_date(filt):
 def get_data_by_date():
     filename = "currentstocktable.csv"
     list_of_items = session['list_of_items_in_stock']
-    print('request request {}'.format(request.args.get("date_to_check")))
+    # print('request request {}'.format(request.args.get("date_to_check")))
     date_to_check = request.args.get("date_to_check")
-    print(" list_of_items list_of_items {}".format(list_of_items))
+    # print(" list_of_items list_of_items {}".format(list_of_items))
     resultedData=[]
     with open(filename, newline= "") as file:
         readData = [row for row in csv.DictReader(file)]
@@ -168,7 +182,7 @@ def get_data_by_date():
         if len(extracted_list) != 0:
             resu = max(extracted_list, key=lambda d: int(d['s_no']))
             max_s_no = int(resu['s_no'])
-            while len(list_of_items)!=0 and max_s_no!=1:
+            while len(list_of_items)!=0 and max_s_no!=0:
                 for moreData in readData:
                     if any(d['item_name'] == moreData['item_name'] for d in list_of_items) and int(moreData['s_no'])==max_s_no and moreData['action']!="reduced":
                         resultedData.append(moreData)
@@ -210,9 +224,9 @@ def updatecurrentstocktable():
                                         updatePerUnitPrice += float(tempData['item_per_unit_price'])*float(tempData['curr_qty_in_stock'])
                                     else:
                                         updatePerUnitPrice += float(tempData['item_per_unit_price'])*float(tempData['lastUpdatedQty'])
-                                    print("check=========>updatePerUnitPrice {} prevSno {}".format(updatePerUnitPrice,prevSno))
+                                    # print("check=========>updatePerUnitPrice {} prevSno {}".format(updatePerUnitPrice,prevSno))
                                     tempDataDict = tempData
-                            print(" tempDataDict['s_no'] {} tempData['s_no'] {}".format(tempDataDict['s_no'],tempData['s_no']))
+                            # print(" tempDataDict['s_no'] {} tempData['s_no'] {}".format(tempDataDict['s_no'],tempData['s_no']))
                             prevSno-=1
                         # if tempDataDict['action']=="reduced" and tempDataDict['item_id']==dataFromReq['item_id'] and tempDataDict['item_name']==dataFromReq['item_name']:
                         #     updatePerUnitPrice += float(tempDataDict['item_per_unit_price'])*float(tempDataDict['curr_qty_in_stock'])
@@ -316,7 +330,7 @@ def get_task():
     with open(filename, newline= "") as file:
         readData = [row for row in csv.DictReader(file)]
     createdData = list(filter(get_filter_by_last_updated_status,readData))
-    print("createdData createdData {}".format(createdData))
+    # print("createdData createdData {}".format(createdData))
     file.close()
     return jsonify(createdData)
 

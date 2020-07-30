@@ -22,8 +22,8 @@ const StockManagement =(props)=> {
 			let countForLastUpdatedItem=0
 			setStockInfoData(props.stockInfoData);
 			props.stockInfoData.map((ele)=>{
-				let option={};
 				let objectOfItemsForPrice = {};
+				let option={};
 				if(ele["is_last_updated"]==="true"){
 					countForLastUpdatedItem+=1;
 					option={value:ele["item_name"],label:ele["item_name"],item_id:ele["item_id"]};
@@ -91,37 +91,47 @@ const StockManagement =(props)=> {
 		let totalPrice=0;
 		let arrItemListTosuuply=[...itemListToAdd];
 		arrItemListTosuuply[index]["errorForQty"]="";
-		try{
-      if(!RegExp("^[0-9]+(?:\.[0-9]+)?$", "g").test(
-				evt.target.value)
-			   && evt.target.value!=""){
-				setButtonDisability(true);
-				arrItemListTosuuply[index]["errorForQty"]="Enter Valid Qty/Amt.";
-			   }
-      // else if(evt.target.name==="lastUpdatedQty"){
-			
-			// 	  stockInfoData.map((toCheckQty)=>{
-			// 		  if(toCheckQty["item_name"]===arrItemListTosuuply[index]["item_name"]){
-			// 			  if(parseFloat(toCheckQty["curr_qty_in_stock"])<parseFloat(evt.target.value)){
-			// 				setButtonDisability(true)
-			// 				  arrItemListTosuuply[index]["errorForQty"]=`${arrItemListTosuuply[index]["item_name"]} is only ${toCheckQty["curr_qty_in_stock"]} ${toCheckQty["item_unit"]} in Stock`;
-			// 			  }
-			// 		  }
-			// 	  })
+		arrItemListTosuuply[index]["errorForPrice"]="";
+	// 	try{
+      
+	// 		// else if(evt.target.name==="lastUpdatedQty"){
+				
+	// 			// 	  stockInfoData.map((toCheckQty)=>{
+	// 				// 		  if(toCheckQty["item_name"]===arrItemListTosuuply[index]["item_name"]){
+	// 					// 			  if(parseFloat(toCheckQty["curr_qty_in_stock"])<parseFloat(evt.target.value)){
+	// 		// 				setButtonDisability(true)
+	// 		// 				  arrItemListTosuuply[index]["errorForQty"]=`${arrItemListTosuuply[index]["item_name"]} is only ${toCheckQty["curr_qty_in_stock"]} ${toCheckQty["item_unit"]} in Stock`;
+	// 		// 			  }
+	// 		// 		  }
+	// 		// 	  })
         
-      // }
-      // else if(evt.target.name==="item_per_unit_price"){
-
-      // }
-		}catch{
-    }
+	// 		// }
+    //   // else if(evt.target.name==="item_per_unit_price"){
+		  
+    //   // }
+	// 	}catch{
+	// 	}
     try{
       if(evt.target.name==="lastUpdatedQty"){
-        arrItemListTosuuply[index]["lastUpdatedQty"]=evt.target.value;
-      }else if(evt.target.name==="item_per_unit_price"){
-        arrItemListTosuuply[index]["item_per_unit_price"]=evt.target.value;
-        itemTotalPrice = arrItemListTosuuply[index]["item_per_unit_price"]*parseFloat(arrItemListTosuuply[index]["lastUpdatedQty"]);
-      }
+		  arrItemListTosuuply[index]["lastUpdatedQty"]=evt.target.value;
+		  if(!RegExp("^[0-9]+(?:\.[0-9]+)?$", "g").test(
+			evt.target.value)
+		   && evt.target.value!=="" ){
+			setButtonDisability(true);
+			arrItemListTosuuply[index]["errorForQty"]="Enter Valid Qty/Amt.";
+		}
+		itemTotalPrice = arrItemListTosuuply[index]["item_per_unit_price"]*parseFloat(arrItemListTosuuply[index]["lastUpdatedQty"]);
+		}else if(evt.target.name==="item_per_unit_price"){
+			arrItemListTosuuply[index]["item_per_unit_price"]=evt.target.value;
+			if(!RegExp("^[0-9]+(?:\.[0-9]+)?$", "g").test(
+				evt.target.value)
+				&& evt.target.value!==""){
+					arrItemListTosuuply[index]["errorForPrice"]="Enter Valid Price for Item";
+				}
+				itemTotalPrice = arrItemListTosuuply[index]["item_per_unit_price"]*parseFloat(arrItemListTosuuply[index]["lastUpdatedQty"]);
+			}
+			if(evt.target.value==="")
+		   setButtonDisability(true);
 	}catch{
 
 	}
@@ -152,26 +162,33 @@ const StockManagement =(props)=> {
 		// let date = getDate();
 		let tempError="";
 
-		let filtered =[];
+		// let filtered =[];
 		// setError(tempError);
 		itemListToAdd.map((ele)=>{
 			let newObj={};
-			// newObj={
-				// try{
-				// 	// if(!RegExp("^[0-9]+(?:\.[0-9]+)?$", "g").test(
-				// 	// 	ele.lastUpdatedQty
-				// 	// 	))
-				// 	// 	{
-				// 	// 		tempError="Provided Qty/Amt. can't be proceeded!! Please Check and try Again!!";
-				// 	// 		setError(tempError);
-				// 	// 		return "";
-							
-				// 	// 	}else{
-				// 			// tempError=ele["error"];
-				// 		// }
-				// 	}catch{
-        //   }
-					
+			try{
+				if(!RegExp("^[0-9]+(?:\.[0-9]+)?$", "g").test(
+					ele.lastUpdatedQty
+					))
+					{
+						tempError="Provided Qty/Amt. can't be processed!! Please Check and try Again!!";
+						setError(tempError);
+						return "";
+						
+					}
+					else if(!RegExp("^[0-9]+(?:\.[0-9]+)?$", "g").test(
+						ele.item_per_unit_price
+						)){
+							tempError="Provided Price for Item can't be processed!! Please Check and try Again!!";
+						setError(tempError);
+						return "";
+
+					}
+					else{
+						tempError=ele["errorForPrice"]+ele["errorForPrice"];
+					}
+				}catch{
+				}
 					newObj["item_id"]=ele.item_id;
 					newObj["item_name"]=ele.item_name;
           newObj["item_unit"]= ele.item_unit;
@@ -220,8 +237,8 @@ const StockManagement =(props)=> {
 					console.log("filtered filtered",filtered)
 
 					setDataProcessedList(filtered);
-					setDatasendingStatus({"status":"done"});
 					updateToHome()
+					setDatasendingStatus({"status":"done"});
 					// setItemListToAdd([{"lastUpdatedQty":"",
 					// "item_per_unit_price":""}]);
 					// setTotalAmount(0);
@@ -230,6 +247,12 @@ const StockManagement =(props)=> {
 						
 					// 	reduceItemToSupply(ele,index)
 					// })
+		// 			let arrToUpdate=[...filtered];
+		// 			arrToUpdate.map((ele,index)=>{
+		// 	arrToUpdate[index]={ ["item_name"]: ele.value, ["curr_qty_in_stock"]: ele["curr_qty_in_stock"] , ["item_unit"]:ele["item_unit"], ["item_id"]: ele["item_id"]}
+			
+		// })
+		setStockInfoData(res.data);
 					setItemListToAdd([{"lastUpdatedQty":"",
 					 "item_per_unit_price":""}])
 					 setOptionsForItems(optionsForItemsPersistent)
@@ -329,7 +352,7 @@ onChange={(chosenOption)=>{
 								</td>
               <td>
 								<input className="removeContentEditable" name="item_per_unit_price" type="text" onChange={(evt)=>handleChange(evt,index)} placeholder={`Enter Price per ${itemListToAdd[index]["item_unit"] ? itemListToAdd[index]["item_unit"] :''}`} value= {itemListToAdd[index]["item_per_unit_price"]}  />
-								<p className="addIner blinking m-0">{itemListToAdd[index]["error"]}</p>
+								<p className="addIner blinking m-0">{itemListToAdd[index]["errorForPrice"]}</p>
 								{/* {itemListToAdd[index]["qtyMeasure"] ?`Enter in ${itemListToAdd[index]["qtyMeasure"]}`:""} */}
 								</td>
 							<td><span data-prefix></span><h5> {itemListToAdd[index]["itemTotalPrice"] ?`Rs ${itemListToAdd[index]["itemTotalPrice"]}` : "Enter Valid Qty"}</h5></td>
