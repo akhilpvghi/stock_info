@@ -3,14 +3,16 @@
 from flask import Flask, jsonify, abort, request, make_response, url_for,session
 from flask_cors import CORS, cross_origin
 from werkzeug.security import generate_password_hash, check_password_hash
+from werkzeug.http import dump_cookie
 # from flask_httpauth import HTTPBasicAuth
 import csv
-from datetime import date
+from datetime import date,datetime
 from functools import wraps
 from collections import defaultdict
 
 app = Flask(__name__, static_url_path = "/static")
 app.secret_key = 'akhilpandey'
+global list_of_items_in_stock
  
 # @app.after_request
 # def after_request(response):
@@ -68,8 +70,21 @@ def after_request(response):
     response.headers.add('Access-Control-Allow-Headers', 'Content-Type,Authorization')
     response.headers.add('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,OPTIONS')
     response.headers.add('Access-Control-Allow-Credentials', 'true')
+    # response.set_cookie('name', 'World', secure=True,samesite=None)
+    # response.headers.add('Set-Cookie','cross-site-cookie=bar; SameSite=None;')
+    response.headers.add('Set-Cookie','cross-site-cookie=bar; SameSite=None; Secure')
+    # response.set_cookie('somekey', 'someval', domain='127.0.0.1', samesite=None,secure=True)
+    # cookie = dump_cookie(*args, **kwargs)
+
+    # if 'samesite' in kwargs and kwargs['samesite'] is None:
+    #     cookie = "{}; {}".format(cookie, b'SameSite=None'.decode('latin1'))
+    # response.headers.add(
+    #     'Set-Cookie',
+    #     cookie
+    # )
+    # response.headers.add('Set-Cookie','cross-site-cookie=bar; SameSite=None; Secure')
     # response.headers.add('cookie','SameSite=None')
-    response.headers.add('Set-Cookie', 'access_token_cookie=bar; SameSite="Lax"; ')
+    # response.headers.add('Set-Cookie', 'access_token_cookie=bar; SameSite="Lax"; ')
   return response
 
 
@@ -133,53 +148,155 @@ def login_required(test):
 @login_required
 def get_tasks():
     filename = "stockManagement.csv"
+    # global list_of_items_in_stock
     with open(filename, newline= "") as file:
         readData = [row for row in csv.DictReader(file)]
+        session['list_of_items_in_stock'] = readData;
     return jsonify(readData)
 # map(make_public_task, tasks)
 
 # @auth.login_required
 
+# def getMaxSNoOnDate():
+    
+# def filter_date(date_to_check):
+        
+#     m1, d1, y1 = [int(x) for x in date_to_check.split('/')]
+#     # m2, d2, y2 = [int(x) for x in firstItemAddedOn.split('/')]
+#     dateToCheck_date = date(y1, m1, d1)
+#     # firstDate_date = date(y2, m2, d2)
+#     return lambda item:  item['lastUpdatedOn'] == date_to_check
+
+
+    # return data['lastUpdatedOn'] == date_to_check
+    
+
+
+@app.route('/getDataByDate', methods = ['GET'])
+@login_required
+def get_data_by_date():
+    filename = "currentstocktable.csv"
+    list_of_items = session['list_of_items_in_stock']
+    # print('request request {}'.format(request.args.get("date_to_check")))
+    date_to_check = request.args.get("date_to_check")
+    firstItemAddedOn=session['firstItemAddedOn']
+    # print(" list_of_items list_of_items {}".format(list_of_items))
+    dateToCheck_date = datetime.strptime(date_to_check, "%m/%d/%Y")
+    resultedData=[]
+    
+    # m1, d1, y1 = [int(x) for x in date_to_check.split('/')]
+    # dateToCheck_date = date(y1, m1, d1)
+    def filter_date(every_date):
+        
+        # m2, d2, y2 = [int(x) for x in every_date['lastUpdatedOn'].split('/')]
+        # everyDate_date = date(y2, m2, d2)
+        # everyDate_date = datetime.strptime(every_date['lastUpdatedOn'], '%m/%d/%Y')
+        # everyDate_date = datetime.strptime(every_date['lastUpdatedOn'][:-3], '%m-%d-%y_%H:%M:%S.%f')
+        everyDate_date = datetime.strptime(every_date['lastUpdatedOn'], "%m/%d/%Y")
+        return everyDate_date<=dateToCheck_date
+
+    with open(filename, newline= "") as file:
+        readData = [row for row in csv.DictReader(file)]
+        extracted_list = list(filter(filter_date,readData))
+        # extracted_list = list(readData, key=lambda d: )
+        # m1, d1, y1 = [int(x) for x in date_to_check.split('/')]
+        # date.today().strftime('%m/%d/%Y')
+        # m2, d2, y2 = [int(x) for x in firstItemAddedOn.split('/')]
+        # firstDate_date = datetime.strptime(firstItemAddedOn, '%m/%d/%Y')
+        # firstDate_date = datetime.strptime(firstItemAddedOn, '%m/%d/%Y')
+        # dateToCheck_date = date(y1, m1, d1)
+        # firstDate_date = date(y2, m2, d2)
+        
+        # firstDate_date = datetime.strptime(firstItemAddedOn, '%m-%d-%y_%H:%M:%S.%f')
+        firstDate_date = datetime.strptime(firstItemAddedOn, "%m/%d/%Y")
+        
+        if len(extracted_list) != 0 and dateToCheck_date>=firstDate_date:
+            resu = max(extracted_list, key=lambda d: int(d['s_no']))
+            max_s_no = int(resu['s_no'])
+            while len(list_of_items)!=0 and max_s_no!=0:
+                for moreData in readData:
+                    if any(d['item_name'] == moreData['item_name'] for d in list_of_items) and int(moreData['s_no'])==max_s_no and moreData['action']!="reduced":
+                        resultedData.append(moreData)
+                        # max_s_no-=1
+                    elif any(d['item_name'] == moreData['item_name'] for d in list_of_items) and int(moreData['s_no'])==max_s_no and moreData['action']=="reduced":
+                        list_of_items[:] = [d for d in list_of_items if d.get('item_name') != moreData['item_name']]
+                        resultedData.append(moreData)
+                max_s_no-=1
+        # for data in readData:
+        #     data['']
+        # max_sn_no = 
+        # for data in readData:
+        #     getMaxSNoOnDate()
+    return jsonify(resultedData)
+
+
 @app.route('/updateCurrentStockTable', methods = ['PUT'])
 @login_required
 def updatecurrentstocktable():
     filename = "currentstocktable.csv"
+    updateCurrentQty=0
+    updatePerUnitPrice = 0
+    prevSno = 0
+    tempDataDict = {}
     with open(filename, newline= "") as file:
         readData = [row for row in csv.DictReader(file)]
         for data in readData:
             for dataFromReq in request.json['itemsToSupply']:
                 if data['item_id']==dataFromReq['item_id'] and data['item_name']==dataFromReq['item_name'] and data['is_last_updated']=="true":
-                    data['curr_qty_in_stock'] = float(data['curr_qty_in_stock'])-float(dataFromReq['amountToSupply'])
+                    prevSno = int(data['s_no'])
                     data['lastUpdatedOn'] = date.today().strftime('%m/%d/%Y')
+                    tempDataDict = data
+                    if data['action']!="reduced":
+                        while tempDataDict['action']!="reduced" and tempDataDict['item_id']==dataFromReq['item_id'] and tempDataDict['item_name']==dataFromReq['item_name'] and tempDataDict['s_no']!='1' and tempDataDict['item_per_unit_price']!='0' and tempDataDict['lastUpdatedQty']!='0':
+                            for tempData in readData:
+                                if tempData['s_no'] == str(prevSno) and tempData['item_id']==dataFromReq['item_id'] and tempData['item_name']==dataFromReq['item_name']:
+                                    # updateCurrentQty = float(tempData['curr_qty_in_stock'])-float(dataFromReq['amountToSupply'])
+                                    if tempData['action']=="reduced":
+                                        updatePerUnitPrice += float(tempData['item_per_unit_price'])*float(tempData['curr_qty_in_stock'])
+                                    else:
+                                        updatePerUnitPrice += float(tempData['item_per_unit_price'])*float(tempData['lastUpdatedQty'])
+                                    # print("check=========>updatePerUnitPrice {} prevSno {}".format(updatePerUnitPrice,prevSno))
+                                    tempDataDict = tempData
+                            # print(" tempDataDict['s_no'] {} tempData['s_no'] {}".format(tempDataDict['s_no'],tempData['s_no']))
+                            prevSno-=1
+                        # if tempDataDict['action']=="reduced" and tempDataDict['item_id']==dataFromReq['item_id'] and tempDataDict['item_name']==dataFromReq['item_name']:
+                        #     updatePerUnitPrice += float(tempDataDict['item_per_unit_price'])*float(tempDataDict['curr_qty_in_stock'])
+                        #     print("check========found reduced")
+                        updatePerUnitPrice=updatePerUnitPrice/float(data['curr_qty_in_stock'])
+                        data['item_per_unit_price'] = round(updatePerUnitPrice,0)
+                    data['lastUpdatedQty']=float(data['curr_qty_in_stock'])-float(dataFromReq['amountToSupply'])
+                    data['curr_qty_in_stock'] = float(data['curr_qty_in_stock'])-float(dataFromReq['amountToSupply'])
+                    # dataFromReq['amountToSupply']
+                    data['action']="reduced"
+                        
                     # dataFromReq['lastUpdatedOn']
-                    data['lastUpdatedQty']="-"+dataFromReq['amountToSupply']
     readHeader = readData[0].keys()
     writer(readHeader, readData, filename, "update")
     file.close()
-    return jsonify(readData)
+    return get_task(), 201
 
 
 def updateIt(dataImp,dataToBeAppended):
     filename = "currentstocktable.csv"
-    headerForCurrentStock = ("s_no","item_id","item_name","item_unit","item_per_unit_price","lastUpdatedQty","lastUpdatedOn","curr_qty_in_stock","is_last_updated")
+    headerForCurrentStock = ("s_no","item_id","item_name","item_unit","item_per_unit_price","lastUpdatedQty","action","lastUpdatedOn","curr_qty_in_stock","is_last_updated")
     files = open(filename, "r")
     idForCurrentStock=0
     line=files.readlines()
     idForCurrentStock=len(line)
     files.seek(0)
     files.close()
-    print("dataImp dataImp {}".format(dataImp))
+    # print("dataImp dataImp {}".format(dataImp))
     for data in dataToBeAppended:
         data["s_no"]= idForCurrentStock
-        print("dataTobeApppw {}",format(data))
+        # print("dataTobeApppw {}",format(data))
         writer(headerForCurrentStock, data, filename, "append")
         idForCurrentStock+=1
-    return jsonify( { 'status': 'done' } ), 201
+    return  get_task(), 201
 
 @app.route('/addInCurrentStockTable', methods = ['PUT'])
 @login_required
 def addInCurrentStockTable():
-    headerForCurrentStock = ("s_no","item_id","item_name","item_unit","item_per_unit_price","lastUpdatedQty","lastUpdatedOn","curr_qty_in_stock","is_last_updated")
+    headerForCurrentStock = ("s_no","item_id","item_name","item_unit","item_per_unit_price","lastUpdatedQty","action","lastUpdatedOn","curr_qty_in_stock","is_last_updated")
   
     filename = "currentstocktable.csv"
     dataImp=request.json['items_to_add']
@@ -207,6 +324,7 @@ def addInCurrentStockTable():
                             'lastUpdatedQty': dataFromReq['lastUpdatedQty'],
                             'lastUpdatedOn': str(date.today().strftime('%m/%d/%Y')), 
                             'curr_qty_in_stock': float(data['curr_qty_in_stock'])+float(dataFromReq['lastUpdatedQty']),
+                            'action': "added",
                             'is_last_updated':"true"
                         }
                         dataToBeAppended.append(dataForCurrentStock)
@@ -219,25 +337,33 @@ def addInCurrentStockTable():
     file.close()
     
     return updateIt(dataImp,dataToBeAppended)
+
+
+def get_filter_by_last_updated_status(data):
+    return data['is_last_updated']=="true"
+    
     
 
 
 @app.route('/currentStockTable', methods = ['GET'])
-# @cross_origin(origins="http://localhost:3000")
-# @cross_origin(origin='*')
-# @cross_origin(origin='localhost')
-# ,headers=['Content- Type','Authorization']
-# @cross_origin(origin='localhost:3000',headers=['Content-Type','Authorization'])
-# @crossdomain(origin='localhost')
-# @cross_origin(origin='localhost:3000',supports_credentials=True)
-@login_required
+# # @cross_origin(origins="http://localhost:3000")
+# # @cross_origin(origin='*')
+# # @cross_origin(origin='localhost')
+# # ,headers=['Content- Type','Authorization']
+# # @cross_origin(origin='localhost:3000',headers=['Content-Type','Authorization'])
+# # @crossdomain(origin='localhost')
+# # @cross_origin(origin='localhost:3000',supports_credentials=True)
+# # @login_required
 def get_task():
     # response.headers.add('Access-Control-Allow-Origin', '*')
+    createdData=[]
     filename = "currentstocktable.csv"
     with open(filename, newline= "") as file:
         readData = [row for row in csv.DictReader(file)]
+    createdData = list(filter(get_filter_by_last_updated_status,readData))
+    # print("createdData createdData {}".format(createdData))
     file.close()
-    return jsonify(readData)
+    return jsonify(createdData)
 
 
 @app.route('/postIntoStockManagement', methods = ['POST'])
@@ -250,7 +376,7 @@ def create_task():
         # readData = [row for row in csv.DictReader(file)]
         # readHeader = readData[0].keys()
     headerForStockManagement = ("s_no","item_id", "item_name", "item_unit")
-    headerForCurrentStock = ("s_no","item_id","item_name","item_unit","item_per_unit_price","lastUpdatedQty","lastUpdatedOn","curr_qty_in_stock","is_last_updated")
+    headerForCurrentStock = ("s_no","item_id","item_name","item_unit","item_per_unit_price","lastUpdatedQty","action","lastUpdatedOn","curr_qty_in_stock","is_last_updated")
     
     f = open(filenameForStockManagement, "r")
     idForStockManagement=0
@@ -272,6 +398,22 @@ def create_task():
     #     (5, request.json['item_name'], request.json['qtyMeasure'],request.json['price'])
     # ]
     
+    if idForStockManagement==1:
+        filename = "auth.csv"
+        with open(filename, newline= "") as fileAuth:
+            readData = [row for row in csv.DictReader(fileAuth)]
+            readHeader = readData[0].keys()
+            for data in readData:
+                data['firstItemAddedOn'] = str(date.today().strftime('%m/%d/%Y'))
+                writer(readHeader, readData, filename, "update")
+        fileAuth.close()
+            # if  data['username']==request.json['username'] and check_password_hash(data['password'],currPassword):
+            #     data['password']=generate_password_hash(request.json['newPassword'], method='sha256')
+            #     return "pasword changed successfully"
+        # else:
+        #     return "old password did not match"
+        
+    
     dataForCurrentStock = {
         's_no':  idForCurrentStock,
         'item_id': idForStockManagement,
@@ -279,6 +421,7 @@ def create_task():
         'item_unit': request.json['item_unit'],
         'item_per_unit_price': 0,
         'lastUpdatedQty': 0,
+        'action': "added",
         'lastUpdatedOn': str(date.today().strftime('%m/%d/%Y')),
         'curr_qty_in_stock': 0,
         'is_last_updated':"true"
@@ -307,6 +450,7 @@ def login():
             readData = [row for row in csv.DictReader(file)]
             for data in readData:
                 if data['username'] == request.json['username'] and check_password_hash(data['password'],request.json['password']):
+                    session['firstItemAddedOn']=data['firstItemAddedOn']
                     session["logged_in"] = True
                     return "successfully logged in"
             else:

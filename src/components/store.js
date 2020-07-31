@@ -15,6 +15,7 @@ const Store =(props)=> {
 	const [error, setError] = useState("");
 	const [elementItemLength, setElementItemLength] = useState(0);
 	const [buttonDisability, setButtonDisability] = useState(true)
+	const [dataProcessedList, setDataProcessedList] = useState([])
 	useEffect(() => {
 		if(props.stockInfoData.length!==0)
 		{
@@ -135,6 +136,10 @@ const Store =(props)=> {
 // return dateString;
 // 	}
 
+let updateToHome=()=>{
+	props.getResponseFromChild('updateStockData');
+  }
+
 	let updateRecord=()=>{
 		
 		let dataToupdateStock=[];
@@ -149,7 +154,7 @@ const Store =(props)=> {
 						ele.amountToSupply
 						))
 						{
-							tempError="Provided Qty/Amt. can't be proceeded!! Please Check and try Again!!";
+							tempError="Provided Qty/Amt. can't be processed!! Please Check and try Again!!";
 							setError(tempError);
 							return "";
 							
@@ -180,8 +185,27 @@ const Store =(props)=> {
 					  };
 			axios(config)
 			.then((res)=>{
-				if(res.data.length!=0)
-				setDatasendingStatus({"status":"done"});
+				if(res.data.length!==0){
+
+					const filtered = res.data.filter((el) => {
+						
+						return dataToupdateStock.some((f) => {
+						  return f.item_name === el.item_name && f.item_id === el.item_id;
+						});
+					  });
+
+					  
+
+					console.log("filtered filtered",filtered)
+
+					setDataProcessedList(filtered);
+					setDatasendingStatus({"status":"done"});
+					updateToHome();
+					setStockInfoData(res.data);
+					setItemListToSupplly([{"amountToSupply":""}])
+					 setOptionsForItems(optionsForItemsPersistent)
+					setElementItemLength(optionsForItemsPersistent.length);
+				}
 			}).catch((err)=>{
 				setDatasendingStatus({"status":"error"});
 				console.log("errr===================>",err);
@@ -189,16 +213,40 @@ const Store =(props)=> {
 		}
 	}
 
-	let succesOfModal = (message)=>(<div className="modal-header">
-    <h4 className="modal-title alert alert-success">Successfully Updated!!!</h4>
-   <div className="primary fa fa-times-circle fa-2x cursrPointer btn btn-primary" onClick={()=>
-   {
-	   setDatasendingStatus({"status":null})
-	window.location.reload(false)
-  }}>
+// 	let succesOfModal = (message)=>(<div className="modal-header">
+//     <h4 className="modal-title alert alert-success">Successfully Updated!!!</h4>
+//    <div className="primary fa fa-times-circle fa-2x cursrPointer btn btn-primary" onClick={()=>
+//    {
+// 	   setDatasendingStatus({"status":null})
+// 	// window.location.reload(false)
+//   }}>
     
-    OK</div>
-	</div>)
+//     OK</div>
+// 	</div>)
+
+let succesOfModal = (message)=>(<div className="modal-header padd0 alert-info">
+{
+	dataProcessedList.map((ele)=>{
+		return(
+			<div class="alert alert-warning" role="alert">
+{/* This is a primary alert—check it out! */}
+{ele['item_name']} is {ele['curr_qty_in_stock']} {ele['item_unit']} in Stock
+</div>
+
+			// <h4 >{ele['item_name']} is {ele['curr_qty_in_stock']} {ele['item_unit']} in Stock</h4>
+		)
+	})
+}
+{/* <h4 className="modal-title alert alert-success">Successfully Updated!!!</h4> */}
+{/* <h4 className="modal-title alert alert-success">Successfully Updated!!!</h4> */}
+<div className="primary fa fa-times-circle fa-2x cursrPointer btn btn-primary" onClick={()=>
+{
+setDatasendingStatus({"status":null})
+// window.location.reload(false)
+}}>
+
+Successfully Updated!!! OK</div>
+</div>)
 
 let failureModal = (message)=>(<div className="modal-header">
 <h4 className="modal-title alert alert-danger">Some Error Occurred!!</h4>

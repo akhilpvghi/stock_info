@@ -2,7 +2,7 @@ import React, {useEffect, useState, useRef} from 'react';
 import '../styles/store.css'
 import Select from "react-select";
 import axios from 'axios';
-import AppModal from './helper/AppModal'
+import AppModal from './helper/AppModal';
 import Processing from './helper/processing';
 
 const StockManagement =(props)=> {
@@ -15,14 +15,15 @@ const StockManagement =(props)=> {
 	const [error, setError] = useState("");
 	const [elementItemLength, setElementItemLength] = useState(0);
 	const [buttonDisability, setButtonDisability] = useState(true)
+	const [dataProcessedList, setDataProcessedList] = useState([])
 	useEffect(() => {
 		if(props.stockInfoData.length!==0)
 		{
 			let countForLastUpdatedItem=0
 			setStockInfoData(props.stockInfoData);
 			props.stockInfoData.map((ele)=>{
-				let option={};
 				let objectOfItemsForPrice = {};
+				let option={};
 				if(ele["is_last_updated"]==="true"){
 					countForLastUpdatedItem+=1;
 					option={value:ele["item_name"],label:ele["item_name"],item_id:ele["item_id"]};
@@ -34,6 +35,10 @@ const StockManagement =(props)=> {
 			setElementItemLength(countForLastUpdatedItem);
 		}
 	}, [])
+
+	let updateToHome=()=>{
+		props.getResponseFromChild('updateStockData');
+	  }
 
 	let addMoreItemToSupply=()=>{
 		let itemLengthOnScreen=elementItemLength;
@@ -86,37 +91,47 @@ const StockManagement =(props)=> {
 		let totalPrice=0;
 		let arrItemListTosuuply=[...itemListToAdd];
 		arrItemListTosuuply[index]["errorForQty"]="";
-		try{
-      if(!RegExp("^[0-9]+(?:\.[0-9]+)?$", "g").test(
-				evt.target.value)
-			   && evt.target.value!=""){
-				setButtonDisability(true);
-				arrItemListTosuuply[index]["errorForQty"]="Enter Valid Qty/Amt.";
-			   }
-      // else if(evt.target.name==="lastUpdatedQty"){
-			
-			// 	  stockInfoData.map((toCheckQty)=>{
-			// 		  if(toCheckQty["item_name"]===arrItemListTosuuply[index]["item_name"]){
-			// 			  if(parseFloat(toCheckQty["curr_qty_in_stock"])<parseFloat(evt.target.value)){
-			// 				setButtonDisability(true)
-			// 				  arrItemListTosuuply[index]["errorForQty"]=`${arrItemListTosuuply[index]["item_name"]} is only ${toCheckQty["curr_qty_in_stock"]} ${toCheckQty["item_unit"]} in Stock`;
-			// 			  }
-			// 		  }
-			// 	  })
+		arrItemListTosuuply[index]["errorForPrice"]="";
+	// 	try{
+      
+	// 		// else if(evt.target.name==="lastUpdatedQty"){
+				
+	// 			// 	  stockInfoData.map((toCheckQty)=>{
+	// 				// 		  if(toCheckQty["item_name"]===arrItemListTosuuply[index]["item_name"]){
+	// 					// 			  if(parseFloat(toCheckQty["curr_qty_in_stock"])<parseFloat(evt.target.value)){
+	// 		// 				setButtonDisability(true)
+	// 		// 				  arrItemListTosuuply[index]["errorForQty"]=`${arrItemListTosuuply[index]["item_name"]} is only ${toCheckQty["curr_qty_in_stock"]} ${toCheckQty["item_unit"]} in Stock`;
+	// 		// 			  }
+	// 		// 		  }
+	// 		// 	  })
         
-      // }
-      // else if(evt.target.name==="item_per_unit_price"){
-
-      // }
-		}catch{
-    }
+	// 		// }
+    //   // else if(evt.target.name==="item_per_unit_price"){
+		  
+    //   // }
+	// 	}catch{
+	// 	}
     try{
       if(evt.target.name==="lastUpdatedQty"){
-        arrItemListTosuuply[index]["lastUpdatedQty"]=evt.target.value;
-      }else if(evt.target.name==="item_per_unit_price"){
-        arrItemListTosuuply[index]["item_per_unit_price"]=evt.target.value;
-        itemTotalPrice = arrItemListTosuuply[index]["item_per_unit_price"]*parseFloat(arrItemListTosuuply[index]["lastUpdatedQty"]);
-      }
+		  arrItemListTosuuply[index]["lastUpdatedQty"]=evt.target.value;
+		  if(!RegExp("^[0-9]+(?:\.[0-9]+)?$", "g").test(
+			evt.target.value)
+		   && evt.target.value!=="" ){
+			setButtonDisability(true);
+			arrItemListTosuuply[index]["errorForQty"]="Enter Valid Qty/Amt.";
+		}
+		itemTotalPrice = arrItemListTosuuply[index]["item_per_unit_price"]*parseFloat(arrItemListTosuuply[index]["lastUpdatedQty"]);
+		}else if(evt.target.name==="item_per_unit_price"){
+			arrItemListTosuuply[index]["item_per_unit_price"]=evt.target.value;
+			if(!RegExp("^[0-9]+(?:\.[0-9]+)?$", "g").test(
+				evt.target.value)
+				&& evt.target.value!==""){
+					arrItemListTosuuply[index]["errorForPrice"]="Enter Valid Price for Item";
+				}
+				itemTotalPrice = arrItemListTosuuply[index]["item_per_unit_price"]*parseFloat(arrItemListTosuuply[index]["lastUpdatedQty"]);
+			}
+			if(evt.target.value==="")
+		   setButtonDisability(true);
 	}catch{
 
 	}
@@ -146,25 +161,34 @@ const StockManagement =(props)=> {
 		let dataToupdateStock=[];
 		// let date = getDate();
 		let tempError="";
+
+		// let filtered =[];
 		// setError(tempError);
 		itemListToAdd.map((ele)=>{
 			let newObj={};
-			// newObj={
-				// try{
-				// 	// if(!RegExp("^[0-9]+(?:\.[0-9]+)?$", "g").test(
-				// 	// 	ele.lastUpdatedQty
-				// 	// 	))
-				// 	// 	{
-				// 	// 		tempError="Provided Qty/Amt. can't be proceeded!! Please Check and try Again!!";
-				// 	// 		setError(tempError);
-				// 	// 		return "";
-							
-				// 	// 	}else{
-				// 			// tempError=ele["error"];
-				// 		// }
-				// 	}catch{
-        //   }
-					
+			try{
+				if(!RegExp("^[0-9]+(?:\.[0-9]+)?$", "g").test(
+					ele.lastUpdatedQty
+					))
+					{
+						tempError="Provided Qty/Amt. can't be processed!! Please Check and try Again!!";
+						setError(tempError);
+						return "";
+						
+					}
+					else if(!RegExp("^[0-9]+(?:\.[0-9]+)?$", "g").test(
+						ele.item_per_unit_price
+						)){
+							tempError="Provided Price for Item can't be processed!! Please Check and try Again!!";
+						setError(tempError);
+						return "";
+
+					}
+					else{
+						tempError=ele["errorForPrice"]+ele["errorForPrice"];
+					}
+				}catch{
+				}
 					newObj["item_id"]=ele.item_id;
 					newObj["item_name"]=ele.item_name;
           newObj["item_unit"]= ele.item_unit;
@@ -188,8 +212,52 @@ const StockManagement =(props)=> {
 					  };
 			axios(config)
 			.then((res)=>{
-				if(res.data.length!=0)
-				setDatasendingStatus({"status":"done"});
+				if(res.data.length!==0)
+				{
+					//  filtered = res.data.filter(item =>        // filter jsondata
+					// 	dataToupdateStock.every( f =>                // so every member of filter array
+					// 		 f.value.includes(item[f.item_name])) )
+
+					// res.data.map((el)=>{
+					// 	let option={value:el["item_name"],label:el["item_name"],item_id:el["item_id"]};
+						
+					// 	// const returnedTarget = Object.assign({},(data)=>{...data,...option});
+					// 	let data = (data)=>[...data,option]
+					// 	setOptionsForItems(data);
+					// })
+					const filtered = res.data.filter((el) => {
+						
+						return dataToupdateStock.some((f) => {
+						  return f.item_name === el.item_name && f.item_id === el.item_id;
+						});
+					  });
+
+					  
+
+					console.log("filtered filtered",filtered)
+
+					setDataProcessedList(filtered);
+					updateToHome()
+					setDatasendingStatus({"status":"done"});
+					// setItemListToAdd([{"lastUpdatedQty":"",
+					// "item_per_unit_price":""}]);
+					// setTotalAmount(0);
+					// setStockInfoData(res.data);
+					// dataToupdateStock.map((ele,index)=>{
+						
+					// 	reduceItemToSupply(ele,index)
+					// })
+		// 			let arrToUpdate=[...filtered];
+		// 			arrToUpdate.map((ele,index)=>{
+		// 	arrToUpdate[index]={ ["item_name"]: ele.value, ["curr_qty_in_stock"]: ele["curr_qty_in_stock"] , ["item_unit"]:ele["item_unit"], ["item_id"]: ele["item_id"]}
+			
+		// })
+		setStockInfoData(res.data);
+					setItemListToAdd([{"lastUpdatedQty":"",
+					 "item_per_unit_price":""}])
+					 setOptionsForItems(optionsForItemsPersistent)
+					setElementItemLength(optionsForItemsPersistent.length);
+				}
 			}).catch((err)=>{
 				setDatasendingStatus({"status":"error"});
 				console.log("errr===================>",err);
@@ -197,15 +265,28 @@ const StockManagement =(props)=> {
 		}
 	}
 
-	let succesOfModal = (message)=>(<div className="modal-header">
-    <h4 className="modal-title alert alert-success">Successfully Updated!!!</h4>
+	let succesOfModal = (message)=>(<div className="modal-header padd0 alert-info">
+		{
+			dataProcessedList.map((ele)=>{
+				return(
+					<div class="alert alert-warning" role="alert">
+  {/* This is a primary alert—check it out! */}
+  {ele['item_name']} is {ele['curr_qty_in_stock']} {ele['item_unit']} in Stock
+</div>
+
+					// <h4 >{ele['item_name']} is {ele['curr_qty_in_stock']} {ele['item_unit']} in Stock</h4>
+				)
+			})
+		}
+{/* <h4 className="modal-title alert alert-success">Successfully Updated!!!</h4> */}
+    {/* <h4 className="modal-title alert alert-success">Successfully Updated!!!</h4> */}
    <div className="primary fa fa-times-circle fa-2x cursrPointer btn btn-primary" onClick={()=>
    {
 	   setDatasendingStatus({"status":null})
-	window.location.reload(false)
+	// window.location.reload(false)
   }}>
     
-    OK</div>
+	Successfully Updated!!! OK</div>
 	</div>)
 
 let failureModal = (message)=>(<div className="modal-header">
@@ -271,7 +352,7 @@ onChange={(chosenOption)=>{
 								</td>
               <td>
 								<input className="removeContentEditable" name="item_per_unit_price" type="text" onChange={(evt)=>handleChange(evt,index)} placeholder={`Enter Price per ${itemListToAdd[index]["item_unit"] ? itemListToAdd[index]["item_unit"] :''}`} value= {itemListToAdd[index]["item_per_unit_price"]}  />
-								<p className="addIner blinking m-0">{itemListToAdd[index]["error"]}</p>
+								<p className="addIner blinking m-0">{itemListToAdd[index]["errorForPrice"]}</p>
 								{/* {itemListToAdd[index]["qtyMeasure"] ?`Enter in ${itemListToAdd[index]["qtyMeasure"]}`:""} */}
 								</td>
 							<td><span data-prefix></span><h5> {itemListToAdd[index]["itemTotalPrice"] ?`Rs ${itemListToAdd[index]["itemTotalPrice"]}` : "Enter Valid Qty"}</h5></td>

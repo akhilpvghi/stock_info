@@ -1,0 +1,5 @@
+s_no,item_id,item_name,item_unit,item_per_unit_price,lastUpdatedQty,action,lastUpdatedOn,curr_qty_in_stock,is_last_updated
+1,1,Rice,Kg,0,0,added,07/31/2020,0,false
+2,1,Rice,Kg,50.0,73.0,reduced,07/31/2020,73.0,false
+3,2,Oil,Ltr,0,0,added,07/31/2020,0,true
+4,1,Rice,Kg,51.0,74.0,reduced,07/31/2020,74.0,true

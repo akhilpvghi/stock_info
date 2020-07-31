@@ -141,7 +141,7 @@ function Table({ columns, data }) {
   
   
   
-  const Admin =()=>{
+  const Admin =(props)=>{
     const[data,setData] =  useState([]);
     const[columns,setColumns] =  useState([]);
     const [showModal, setShowModal] = useState({status: ""});
@@ -192,6 +192,8 @@ function Table({ columns, data }) {
     axios(config)
     .then((res)=>{
         console.log("response from stock table",res.data);
+        if(res.data.length!==0){
+
         res.data.map((ele) => {
             // setData([]);
             setData((dataRecord)=>[...dataRecord,ele]);
@@ -230,11 +232,12 @@ function Table({ columns, data }) {
                         ),
                       accessor: "item_unit"}];
                setColumns(dataEle)
-        })
+        })}
     })
     .catch((err)=>{
         console.log("error",err);
     })
+  
     
   }, [])
 
@@ -352,6 +355,10 @@ onChange={(chosenOption)=>{
 
     </div>);
 
+    let setChangePasswordCompo=()=>{
+      props.getResponseFromChild('chanePassword');
+    }
+
 let failureModal = (message)=>(<div className="modal-header">
 <h4 className="modal-title alert alert-danger">Some Error Occurred!!</h4>
 <div className="primary fa fa-times-circle fa-2x cursrPointer btn btn-warning" onClick={()=>
@@ -370,20 +377,24 @@ let content = (
     <div className="card bg-primary mainContent">
     {/* <h1>Home</h1> */}
 
-    <div className="toSetAtRightCorner">
-    <div className="add forMgmt" onClick={()=>setShowModal({status: "createData"})}>Add Item +</div>
-    </div>
     {/* onClick={} */}
+    <div className="oneMoreFlex">
     <Styles>
       <Table columns={columns} data={data} />
     </Styles>
-    {showModal.status=="createData" ?  (
+    <div className="toSetAtRightCorner">
+    <div className="add forMgmt" onClick={()=>setShowModal({status: "createData"})}>Add Item +</div>
+    <div className="add forMgmt" onClick={()=>setChangePasswordCompo()}>Change Password</div>
+    {/* onClick={()=>setShowModal({status: "createData"})} */}
+    </div>
+    </div>
+    {showModal.status==="createData" ?  (
         <AppModal componentToLoad={internalInputCompo} ></AppModal>
     ) :null}
-    {showModal.status=="processing" ?  (
+    {showModal.status==="processing" ?  (
         <AppModal componentToLoad={<Processing></Processing>} ></AppModal>
     ) :null}
-    {showModal.status=="done" ?  (
+    {showModal.status==="done" ?  (
         <AppModal componentToLoad={succesOfModal} ></AppModal>
     ) :null}
     {showModal.status==="error" ?  (

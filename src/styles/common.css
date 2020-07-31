@@ -205,8 +205,13 @@ height: 180px;
 
 .toSetAtRightCorner {
     display: flex;
-    width: 100%;
-    justify-content: flex-end;
+    /* width: 100%; */
+    /* justify-content: flex-end; */
+    height: 102px;
+    flex-direction: column;
+    align-items: flex-end;
+    width: min-content;
+    /* height flex-direction align-items to set along with table in admin  */
 }
 
 .add.forMgmt{
@@ -233,6 +238,9 @@ height: 180px;
 .modal-header {
  
   align-items: center !important;
+  /* display: flex;
+    flex-direction: column; */
+/* as display when updating list  removed*/
 }
 
 /* above solves problem in modal header button allignment */

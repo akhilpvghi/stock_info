@@ -11,7 +11,7 @@ import Processing from './helper/processing';
 import ChangePassword from './ChangePassword'
 // import Cookies from 'universal-cookie';
     const Home = ()=>{
-        const navbarElementsFromHome = ["Admin", "Stock Management",  "Store" , "Stock Info", "Change Password", "About"];
+        const navbarElementsFromHome = ["Admin", "Stock Management",  "Stock Info","Store" , "About"];
         const[componentName,setComponentName]=useState("Admin");
         const[component,setComponent] =  useState(null);
         const [collapsed, setCollapsed] = useState(true);
@@ -76,8 +76,8 @@ import ChangePassword from './ChangePassword'
                 )
             .then((res)=>{
                 console.log("response from Stock Management",res.data);
-                if(res.data!=='fail'){
-
+                if(res.data!=='fail' ){
+                    // && res.data.length!==0 //we dont want to authenticate fail if tehre is nothing in stock
                     let addHtml=[];
                      res.data.map((ele)=>{
                          let newObj={};
@@ -108,7 +108,7 @@ import ChangePassword from './ChangePassword'
             const handleChange = (evt) => {
                 const name = evt.target.name;
                 const newValue = evt.target.value;
-                console.log("name",name," value ",newValue)
+                // console.log("name",name," value ",newValue)
                 setUserInput({ [name]: newValue });
                 setError("");
             // setError({})
@@ -126,12 +126,18 @@ import ChangePassword from './ChangePassword'
 
             let responseFromChild=(isRefreshRequire)=>{
 
-                setShowModalObject({...showModalObject,...{"status":null}});
-                if(isRefreshRequire){
-
-                    window.location.reload(false);
-                    // getStockTableData()
+                if(isRefreshRequire.includes("chanePassword")){
+                    setComponent(<ChangePassword username={userInput.username}/>)
+                    setComponentName("Change Password");
+                }else if(isRefreshRequire.includes("updateStockData")){
+                    getStockTableData();
                 }
+                // setShowModalObject({...showModalObject,...{"status":null}});
+                // if(isRefreshRequire){
+
+                //     window.location.reload(false);
+                //     // getStockTableData()
+                // }
                 // setIsAuthenticated(true)
                 console.log("child called in parent",isRefreshRequire);
             }
@@ -172,6 +178,8 @@ import ChangePassword from './ChangePassword'
                          console.log('cokkkkkkkkkkiieee  ==>',res.headers);
                          localStorage.setItem("username",userInput.username)
                         setIsAuthenticated(true);
+                        
+                        setComponentName('Admin')
                         callbackExpt(res.data.includes("success"),getStockTableData)
                         // ;
                     }else{
@@ -219,18 +227,18 @@ import ChangePassword from './ChangePassword'
             console.log("is it also called");
             switch (componentName) {
                 case 'Stock Management':
-                    setComponent(<StockManagement stockInfoData={stockInfodata} />)
+                    setComponent(<StockManagement stockInfoData={stockInfodata} getResponseFromChild={responseFromChild}/>)
                     // showModalHomeObject={showModalObject} getResponseFromChild={responseFromChild}
                     break;
                 case 'Admin':
-                    setComponent(<Admin />)
+                    setComponent(<Admin getResponseFromChild={responseFromChild}/>)
                     break;
                 case 'Stock Info':
                     setComponent(<StockInfo stockInfoData={stockInfodata}/>)
                     break;
                 case 'Store':
-                        if(stockInfodata.length!=0)
-                        setComponent(<Store stockInfoData={stockInfodata}/>)
+                        if(stockInfodata.length!==0)
+                        setComponent(<Store stockInfoData={stockInfodata} getResponseFromChild={responseFromChild}/>)
                         break;
                 case 'Change Password':
                     setComponent(<ChangePassword username={userInput.username}/>)
