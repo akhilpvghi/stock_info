@@ -6,7 +6,7 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from werkzeug.http import dump_cookie
 # from flask_httpauth import HTTPBasicAuth
 import csv
-from datetime import date
+from datetime import date,datetime
 from functools import wraps
 from collections import defaultdict
 
@@ -159,8 +159,13 @@ def get_tasks():
 
 # def getMaxSNoOnDate():
     
-def filter_date(filt):
-    return lambda item:  item['lastUpdatedOn'] == filt
+# def filter_date(date_to_check):
+        
+#     m1, d1, y1 = [int(x) for x in date_to_check.split('/')]
+#     # m2, d2, y2 = [int(x) for x in firstItemAddedOn.split('/')]
+#     dateToCheck_date = date(y1, m1, d1)
+#     # firstDate_date = date(y2, m2, d2)
+#     return lambda item:  item['lastUpdatedOn'] == date_to_check
 
 
     # return data['lastUpdatedOn'] == date_to_check
@@ -174,12 +179,38 @@ def get_data_by_date():
     list_of_items = session['list_of_items_in_stock']
     # print('request request {}'.format(request.args.get("date_to_check")))
     date_to_check = request.args.get("date_to_check")
+    firstItemAddedOn=session['firstItemAddedOn']
     # print(" list_of_items list_of_items {}".format(list_of_items))
+    dateToCheck_date = datetime.strptime(date_to_check, "%m/%d/%Y")
     resultedData=[]
+    
+    # m1, d1, y1 = [int(x) for x in date_to_check.split('/')]
+    # dateToCheck_date = date(y1, m1, d1)
+    def filter_date(every_date):
+        
+        # m2, d2, y2 = [int(x) for x in every_date['lastUpdatedOn'].split('/')]
+        # everyDate_date = date(y2, m2, d2)
+        # everyDate_date = datetime.strptime(every_date['lastUpdatedOn'], '%m/%d/%Y')
+        # everyDate_date = datetime.strptime(every_date['lastUpdatedOn'][:-3], '%m-%d-%y_%H:%M:%S.%f')
+        everyDate_date = datetime.strptime(every_date['lastUpdatedOn'], "%m/%d/%Y")
+        return everyDate_date<=dateToCheck_date
+
     with open(filename, newline= "") as file:
         readData = [row for row in csv.DictReader(file)]
-        extracted_list = list(filter(filter_date(date_to_check),readData))
-        if len(extracted_list) != 0:
+        extracted_list = list(filter(filter_date,readData))
+        # extracted_list = list(readData, key=lambda d: )
+        # m1, d1, y1 = [int(x) for x in date_to_check.split('/')]
+        # date.today().strftime('%m/%d/%Y')
+        # m2, d2, y2 = [int(x) for x in firstItemAddedOn.split('/')]
+        # firstDate_date = datetime.strptime(firstItemAddedOn, '%m/%d/%Y')
+        # firstDate_date = datetime.strptime(firstItemAddedOn, '%m/%d/%Y')
+        # dateToCheck_date = date(y1, m1, d1)
+        # firstDate_date = date(y2, m2, d2)
+        
+        # firstDate_date = datetime.strptime(firstItemAddedOn, '%m-%d-%y_%H:%M:%S.%f')
+        firstDate_date = datetime.strptime(firstItemAddedOn, "%m/%d/%Y")
+        
+        if len(extracted_list) != 0 and dateToCheck_date>=firstDate_date:
             resu = max(extracted_list, key=lambda d: int(d['s_no']))
             max_s_no = int(resu['s_no'])
             while len(list_of_items)!=0 and max_s_no!=0:
@@ -367,6 +398,22 @@ def create_task():
     #     (5, request.json['item_name'], request.json['qtyMeasure'],request.json['price'])
     # ]
     
+    if idForStockManagement==1:
+        filename = "auth.csv"
+        with open(filename, newline= "") as fileAuth:
+            readData = [row for row in csv.DictReader(fileAuth)]
+            readHeader = readData[0].keys()
+            for data in readData:
+                data['firstItemAddedOn'] = str(date.today().strftime('%m/%d/%Y'))
+                writer(readHeader, readData, filename, "update")
+        fileAuth.close()
+            # if  data['username']==request.json['username'] and check_password_hash(data['password'],currPassword):
+            #     data['password']=generate_password_hash(request.json['newPassword'], method='sha256')
+            #     return "pasword changed successfully"
+        # else:
+        #     return "old password did not match"
+        
+    
     dataForCurrentStock = {
         's_no':  idForCurrentStock,
         'item_id': idForStockManagement,
@@ -403,6 +450,7 @@ def login():
             readData = [row for row in csv.DictReader(file)]
             for data in readData:
                 if data['username'] == request.json['username'] and check_password_hash(data['password'],request.json['password']):
+                    session['firstItemAddedOn']=data['firstItemAddedOn']
                     session["logged_in"] = True
                     return "successfully logged in"
             else:

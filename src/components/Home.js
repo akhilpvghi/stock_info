@@ -178,6 +178,8 @@ import ChangePassword from './ChangePassword'
                          console.log('cokkkkkkkkkkiieee  ==>',res.headers);
                          localStorage.setItem("username",userInput.username)
                         setIsAuthenticated(true);
+                        
+                        setComponentName('Admin')
                         callbackExpt(res.data.includes("success"),getStockTableData)
                         // ;
                     }else{
