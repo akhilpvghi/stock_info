@@ -232,6 +232,11 @@ const StockManagement =(props)=> {
 						});
 					  });
 
+					  filtered.map((ele)=>{
+						  ele['lastUpdatedQty']="";
+						ele['item_per_unit_price']="";
+				})
+
 					  
 
 					console.log("filtered filtered",filtered)
@@ -241,7 +246,7 @@ const StockManagement =(props)=> {
 					setDatasendingStatus({"status":"done"});
 					// setItemListToAdd([{"lastUpdatedQty":"",
 					// "item_per_unit_price":""}]);
-					// setTotalAmount(0);
+					setTotalAmount(0);
 					// setStockInfoData(res.data);
 					// dataToupdateStock.map((ele,index)=>{
 						
@@ -253,8 +258,9 @@ const StockManagement =(props)=> {
 			
 		// })
 		setStockInfoData(res.data);
-					setItemListToAdd([{"lastUpdatedQty":"",
-					 "item_per_unit_price":""}])
+					// setItemListToAdd([{"lastUpdatedQty":"",
+					//  "item_per_unit_price":""}])
+					setItemListToAdd(filtered)
 					 setOptionsForItems(optionsForItemsPersistent)
 					setElementItemLength(optionsForItemsPersistent.length);
 				}
@@ -321,7 +327,7 @@ let content =(
 						<th><span >Price</span></th>
 						<th><span >Total</span></th>
             <th><span >Current Qty In Stock</span></th>
-						<th><span >Total</span></th>
+						{/* <th><span >Total</span></th> */}
 					</tr>
 				</thead>
 				<tbody>
@@ -355,15 +361,17 @@ onChange={(chosenOption)=>{
 								<p className="addIner blinking m-0">{itemListToAdd[index]["errorForPrice"]}</p>
 								{/* {itemListToAdd[index]["qtyMeasure"] ?`Enter in ${itemListToAdd[index]["qtyMeasure"]}`:""} */}
 								</td>
-							<td><span data-prefix></span><h5> {itemListToAdd[index]["itemTotalPrice"] ?`Rs ${itemListToAdd[index]["itemTotalPrice"]}` : "Enter Valid Qty"}</h5></td>
+							<td><span data-prefix></span><h5> {itemListToAdd[index]["itemTotalPrice"] ?`Rs ${itemListToAdd[index]["itemTotalPrice"]}` : ""}</h5></td>
+							{/* Enter Valid Qty */}
                 <td><h5 data-prefix>{itemListToAdd[index]["curr_qty_in_stock"]} {itemListToAdd[index]["item_unit"]}</h5></td>
-							<td><span data-prefix></span><h5> {itemListToAdd[index]["itemTotalPrice"] ?`Rs ${itemListToAdd[index]["itemTotalPrice"]}` : "Enter Valid Qty"}</h5></td>
+							{/* <td><span data-prefix></span><h5> {itemListToAdd[index]["itemTotalPrice"] ?`Rs ${itemListToAdd[index]["itemTotalPrice"]}` : ""}</h5></td> */}
+							{/* Enter Valid Qty */}
 						</tr>)
 					})}
 					
 				</tbody>
 			</table>
-			{elementItemLength!==1 ? <div className="add" onClick={()=>addMoreItemToSupply()}>+</div> :null}
+			{elementItemLength!==1 ? <div className="add" onClick={()=>addMoreItemToSupply()}>Add more item</div> :null}
 			<table className="balance">
 				<tr>
 					<th><span >Total</span></th>
@@ -374,7 +382,7 @@ onChange={(chosenOption)=>{
 			
 			{/* onClick={()=>()} */}
 		</div>
-			<button type="button" className="btn btn-success" disabled={buttonDisability}  onClick={updateRecord}>Add Items</button>
+			<button type="button" className="btn btn-success" disabled={buttonDisability}  onClick={updateRecord}>Update Record</button>
 			{/* <p className="addIner blinking">{error} </p> */}
 			{ error!=="" ? <p className="addIner blinking alert alert-danger">{error}</p> :null} 
 		

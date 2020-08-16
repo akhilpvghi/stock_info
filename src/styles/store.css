@@ -71,7 +71,10 @@ header input { cursor: pointer; -ms-filter:"progid:DXImageTransform.Microsoft.Al
 
 /* table meta & balance */
 
-table.meta, table.balance { float: right; width: 36%; margin-right: 8em;}
+table.meta, table.balance { float: right; width: 36%; 
+	/* margin-right: 8em; */
+/* as it was set in right bit in stock info  */
+}
 table.meta:after, table.balance:after { clear: both; content: ""; display: table; }
 
 /* table meta */
@@ -110,7 +113,7 @@ aside h1 { border-color: #999; border-bottom-style: solid; }
 	padding: 0.25em 0.5em;	
 	float: left;
 	text-align: center;
-	width: 2.2em;
+	/* width: 2.2em; when + changed to add more item */
 }
 
 .add, .cut

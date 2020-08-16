@@ -26,7 +26,8 @@
 }
 
 .oneMoreFlex {
-  display: flex;
+  display: flex !important;
+  flex-direction: row !important;;
   justify-content: center;
   width: inherit;
 }
