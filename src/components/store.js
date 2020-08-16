@@ -202,7 +202,8 @@ let updateToHome=()=>{
 					setDatasendingStatus({"status":"done"});
 					updateToHome();
 					setStockInfoData(res.data);
-					setItemListToSupplly([{"amountToSupply":""}])
+					// setItemListToSupplly([{"amountToSupply":""}])
+					setItemListToSupplly(filtered)
 					 setOptionsForItems(optionsForItemsPersistent)
 					setElementItemLength(optionsForItemsPersistent.length);
 				}
@@ -274,9 +275,9 @@ let content =(
 				<thead>
 					<tr>
 						<th><span >Item</span></th>
-						<th><span >Description</span></th>
-						<th><span >Current Qty In Stock</span></th>
+						{/* <th><span >Description</span></th> */}
 						<th><span >Quantity</span></th>
+						<th><span >Current Qty In Stock</span></th>
 						{/* <th><span >Price</span></th> */}
 					</tr>
 				</thead>
@@ -297,20 +298,20 @@ onChange={(chosenOption)=>{
 } 
 />
 </td>
-							<td><span >Updating On {new Date().toDateString()}</span></td>
-							<td><h5 data-prefix> {itemListToSupplly[index]["curr_qty_in_stock"]} {itemListToSupplly[index]["item_unit"]}</h5></td>
+							{/* <td><span >Updating On {new Date().toDateString()}</span></td> */}
 							<td>
 								<input className="removeContentEditable" type="text" onChange={(evt)=>handleChange(evt,index)} placeholder={itemListToSupplly[index]["item_unit"] ?`Enter in ${itemListToSupplly[index]["item_unit"]}`:""} value= {itemListToSupplly[index]["amountToSupply"]}  />
 								<p className="addIner blinking m-0">{itemListToSupplly[index]["error"]}</p>
 								
 								</td>
+							<td><h5 data-prefix> {itemListToSupplly[index]["curr_qty_in_stock"]} {itemListToSupplly[index]["item_unit"]}</h5></td>
 							{/* <td><span data-prefix></span><h5> {itemListToSupplly[index]["itemTotalPrice"] ?`Rs ${itemListToSupplly[index]["itemTotalPrice"]}` : "Enter Valid Qty"}</h5></td> */}
 						</tr>)
 					})}
 					
 				</tbody>
 			</table>
-			{elementItemLength!==1 ? <div className="add" onClick={()=>addMoreItemToSupply()}>+</div> :null}
+			{elementItemLength!==1 ? <div className="add" onClick={()=>addMoreItemToSupply()}>Add more item</div> :null}
 			<table className="balance">
 				{/* <tr>
 					<th><span >Total</span></th>

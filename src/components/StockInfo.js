@@ -1,4 +1,4 @@
-import React, {useState, useEffect} from 'react';
+import React, {useState,  useRef} from 'react';
 import DatePicker from "react-datepicker";
 import '../styles/common.css'
 import '../styles/stockInfo.css';
@@ -9,6 +9,7 @@ import axios from 'axios';
 import AppModal from './helper/AppModal';
 import Processing from './helper/processing';
 import GetSortOrder from './helper/getSorting';
+import Papa from 'papaparse';
 
 const Styles = styled.div`
   padding: 1rem;
@@ -141,11 +142,15 @@ function Table({ columns, data }) {
 const StockInfo =(props)=> {
 
     const [startDate, setStartDate] = useState()
+    const [endDate, setEndDate] = useState(null)
     // const [stockInfoData, setStockInfoData] = useState([])
-    const [dataSendingStatus, setDataSendingStatus] = useState({"status":null})
+    const [dataSendingStatus, setDataSendingStatus] = useState({"status":null,
+  "errorMsg":""})
     const [tableData, setTableData] = useState([])
     const[columns,setColumns] =  useState([]);
     const [totalAmount, setTotalAmount] = useState(0);
+    const [checkboxValue, setCheckboxValue] = useState(true);
+    const refInput = useRef();
 
     let getDate =(dateChng)=>{
 		var date = new Date(dateChng); 
@@ -158,57 +163,158 @@ return dateString;
 	}
 
 
+  // let handleChangeForSelectBox=(evt)=>{
+  //   let checkedValue = checkboxValue;
+  //   checkedValue=!checkedValue;
+  //   setCheckboxValue(checkedValue);
+  //   console.log("checkbox",checkedValue,evt.target.value,evt.target,refInput.current);
+  // }
 
-    let handleChange=(date)=>{
-      let price =0;
+  let handleChangeEndDate=(evtDates)=>{
+    // evtStartDate="",e
+    let price =0;
+      let modifyData=[];
+      let tempObj={};
+      let [sm,sd,sy]=["","",""];
+      let [em,ed,ey]=["","",""];
+      let evtEndDate = evtDates;
+      let evtStartDate=startDate;
+      if(evtDates[0]){
+        evtStartDate = evtDates[0];
+        evtEndDate = evtDates[1];
+      }
+
+      [sm,sd,sy] = getDate(evtStartDate).split('/');
+      [em,ed,ey] = getDate(evtEndDate).split('/');
+    let start = new Date(`${sy}-${sm}-${sd}`); //yyyy-mm-dd  
+    let end = new Date(`${ey}-${em}-${ed}`); //yyyy-mm-dd  
+    setEndDate(evtEndDate)
+    console.log("typeof evtEndDate",evtEndDate[0]);
+    console.log("date problem start.getTime()",start.getTime(),end.getTime(),`${sy}-${sm}-${sd}`,`${ey}-${em}-${ed}`);
+    if(start.getTime()<end.getTime()){
+      
+      setDataSendingStatus({"status":"processing"});
+      let config = {
+        method: 'get',
+        url: `/getDataInBetweenDates?date_from=${getDate(evtStartDate)}&date_to=${getDate(evtEndDate)}`,
+        withCredentials: true,
+      };
+      axios(config)
+      .then((res)=>{
+
+        if(res.data.length!==0){
+          // GetSortOrder()
+          
+          // res.data.sort(function (a, b) {
+            //   return a.s_no.localeCompare((b['s_no']));
+            //   modifyData.sort(function(a, b) {
+              //       return parseInt(a.item_name) < parseInt(b.item_name);
+          
+              // })
+              setDataSendingStatus({"status":null}); 
+              res.data.map((ele)=>{
+                if(ele['action'].includes("reduced")){
+                  price+=ele['item_per_unit_price']*ele['lastUpdatedQty']*-1
+                  ele['lastUpdatedQty']=`-${ele['lastUpdatedQty']}`
+                  tempObj=ele;
+            }
+            else{
+              price+=ele['item_per_unit_price']*ele['lastUpdatedQty']
+              tempObj=ele;
+            }
+            // ele['curr_qty_in_stock']=`${ele['curr_qty_in_stock']} ${ele['item_unit']}` 
+            modifyData=[...modifyData,tempObj]
+          })
+
+          modifyData =res.data.sort(GetSortOrder("s_no",true));
+          modifyData =modifyData.sort(GetSortOrder("item_name",false));
+
+          setTableData(modifyData)
+
+          setTotalAmount(price);
+        }else{
+          setTableData([])
+          setTotalAmount(0);
+
+          setDataSendingStatus({"status":"noRecord"}); 
+        }
+
+      })
+      .catch((err)=>console.log(err))
+    }else if(start.getTime()===end.getTime()){
+      getDataOfSingleDate(evtStartDate)
+      console.log("both dates are equal")
+    }
+    
+    else{
+      console.log("date problem", start.getTime(), end.getTime());
+      setDataSendingStatus({"status":"error",
+                            "errorMsg": "To \"Date\" should be later than \"from\" Date"
+      }); 
+    }
+  }
+
+  let getDataOfSingleDate=(date)=>{
+    let price =0;
       let modifyData=[];
         console.log(getDate(date));
-        setStartDate(date)
-        setDataSendingStatus({"status":"processing"});
-        let config = {
-          method: 'get',
-          url: `/getDataByDate?date_to_check=${getDate(date)}`,
-          withCredentials: true,
-        };
-        axios(config)
-        .then((res)=>{
-          console.log("res.data stockklinfo",res.data);
-          if(res.data.length!==0){
-            modifyData =res.data.sort(GetSortOrder("s_no",true));
-            modifyData =modifyData.sort(GetSortOrder("item_name",false));
-            // GetSortOrder()
+    setDataSendingStatus({"status":"processing"});
+          let config = {
+            method: 'get',
+            url: `/getDataByDate?date_to_check=${getDate(date)}`,
+            withCredentials: true,
+          };
+          axios(config)
+          .then((res)=>{
+            console.log("res.data stockklinfo",res.data);
+            if(res.data.length!==0){
+              modifyData =res.data.sort(GetSortOrder("s_no",true));
+              modifyData =modifyData.sort(GetSortOrder("item_name",false));
+              // GetSortOrder()
+              
+              // res.data.sort(function (a, b) {
+              //   return a.s_no.localeCompare((b['s_no']));
+            //   modifyData.sort(function(a, b) {
+            //       return parseInt(a.item_name) < parseInt(b.item_name);
+              
+            // })
+              setTableData(modifyData)
+              setDataSendingStatus({"status":null}); 
+              res.data.map((ele)=>{
+                if(ele['action'].includes("reduced")){
+  
+                  price+=ele['item_per_unit_price']*ele['curr_qty_in_stock']
+                }
+                else{
+                  price+=ele['item_per_unit_price']*ele['lastUpdatedQty']
+  
+                }
+              })
+              setTotalAmount(price);
+            }else{
+              setTableData([])
+              setTotalAmount(0);
+  
+              setDataSendingStatus({"status":"noRecord"}); 
+            }
             
-            // res.data.sort(function (a, b) {
-            //   return a.s_no.localeCompare((b['s_no']));
-          //   modifyData.sort(function(a, b) {
-          //       return parseInt(a.item_name) < parseInt(b.item_name);
-            
-          // })
-            setTableData(modifyData)
-            setDataSendingStatus({"status":null}); 
-            res.data.map((ele)=>{
-              if(ele['action'].includes("reduced")){
+          })
+          .catch((err)=>{
+            setDataSendingStatus({"status":"error"}); 
+  
+      })
+  }
 
-                price+=ele['item_per_unit_price']*ele['curr_qty_in_stock']
-              }
-              else{
-                price+=ele['item_per_unit_price']*ele['lastUpdatedQty']
 
-              }
-            })
-            setTotalAmount(price);
-          }else{
-            setTableData([])
-            setTotalAmount(0);
-
-            setDataSendingStatus({"status":"noRecord"}); 
-          }
-          
-        })
-        .catch((err)=>{
-          setDataSendingStatus({"status":"error"}); 
-
-    })
+    let handleChange=(startDate)=>{
+      
+        setStartDate(startDate);
+        let storeDates=[];
+        storeDates[0] = startDate;
+        storeDates[1] = endDate;
+        if(endDate!=null){
+          handleChangeEndDate(storeDates);
+        }
         // setTableData(stockInfoData.filter((ele)=>{
         //     return ele.lastUpdatedOn===getDate(date)
         // }))
@@ -273,10 +379,49 @@ return dateString;
 
     }
 
+    let downlaodCSV=()=>{
+      console.log("csv dattttta",tableData)
+      let objectForCSV,lastRow ;
+      let arrayForCSV = [];
+      let createDataForcsv = tableData;
+      createDataForcsv.map((ele,index)=>{
+        objectForCSV = {};
+        objectForCSV['S.No']=index+1;
+        objectForCSV['Item Name']=ele['item_name'];
+        objectForCSV['Price']=ele['item_per_unit_price'];
+        objectForCSV['Updated Qty']=ele['lastUpdatedQty'];
+        objectForCSV['Current Qty in Stock']=ele['curr_qty_in_stock'];
+        objectForCSV['Updated On']=ele['lastUpdatedOn'];
+        arrayForCSV=[...arrayForCSV,objectForCSV]
+      })
+      lastRow={"S.No":"","Item Name":"","Price":"","Updated Qty":"","Current Qty in Stock":"Total Price","Updated On":totalAmount}
+      arrayForCSV=[...arrayForCSV,lastRow]
+      let csv = Papa.unparse(arrayForCSV);
+      // const results = jsonToCSV(tableData)
+      let blob = new Blob([csv], {type: 'text/csv;charset=utf-8;'});
+if (window.navigator.msSaveOrOpenBlob)  // IE hack; see http://msdn.microsoft.com/en-us/library/ie/hh779016.aspx
+    window.navigator.msSaveBlob(blob, "StockReport.csv");
+else
+{
+    var a = window.document.createElement("a");
+    a.href = window.URL.createObjectURL(blob, {type: "text/plain"});
+    a.download = "StockReport.csv";
+    document.body.appendChild(a);
+    a.click();  // IE: "Access is denied"; see: https://connect.microsoft.com/IE/feedback/details/797361/ie-10-treats-blob-url-as-cross-origin-and-denies-access
+    document.body.removeChild(a);
+}
+// let csvURL = window.URL.createObjectURL(csvData);
+// let testLink = document.createElement('a');
+// testLink.href = csvURL;
+// testLink.setAttribute('test', 'test.csv');
+// testLink.click();
+    }
+
+
     
 
 let failureModal = ()=>(<div className="modal-header">
-<h4 className="modal-title alert alert-danger">Some Error Occurred!!</h4>
+<h4 className="modal-title alert alert-danger">{dataSendingStatus.errorMsg===""?"Some Error Occurred!!":dataSendingStatus.errorMsg}</h4>
 <div className="primary fa fa-times-circle fa-2x cursrPointer btn btn-warning" onClick={()=>
 {
    setDataSendingStatus({"status":null})
@@ -303,7 +448,9 @@ let succesOfModal = ()=>(<div className="modal-header">
 
     let content = (<div className="card bg-primary mainContent">
         <div className="stockInfoNew">
-       <label forName="date">Select Date: </label>
+          <div className="date_selection_section">
+            <div className="mini_date_column">
+       <label forName="date">Select Date: From</label>
         <DatePicker
         id="date"
         dateFormat="MM/dd/yyyy"
@@ -311,6 +458,31 @@ let succesOfModal = ()=>(<div className="modal-header">
         onChange={handleChange}
         // dateFormat="Pp" //to show time
       />
+      </div>
+
+      <div className="mini_date_column">
+<label forName="date">Select Date: To</label>
+      <div className="oneMoreFlex">
+{/* // {checkboxValue?<label className="smallText" forName="date">Same as Date from:</label>: */}
+        <DatePicker
+        id="date"
+        dateFormat="MM/dd/yyyy"
+        selected={endDate}
+        onChange={handleChangeEndDate}
+        // dateFormat="Pp" //to show time
+        />
+      {/* // } */}
+{/* <div class="form-check" style={{paddingLeft: "1.75em"}}> */}
+        {/* {checkboxValue?<label forName="date">Same as from Date:</label>:null} */}
+  {/* <input className="form-check-input position-static checkbox_size" ref={refInput} checked={checkboxValue} type="checkbox" id="blankCheckbox"  onChange={handleChangeForSelectBox}  /> */}
+  {/* aria-label="..." */}
+{/* </div> */}
+</div>
+        </div>
+
+                        
+
+</div>
         {/* <h3>Stock info</h3> */}
         <Styles>
       <Table columns={columns} data={tableData} />
@@ -322,6 +494,7 @@ let succesOfModal = ()=>(<div className="modal-header">
 				</tr>
 				
 			</table>
+      <button className="btn btn-primary" disabled={tableData.length===0} onClick={downlaodCSV}>Export Report</button>
     {dataSendingStatus.status==="processing" ?  (
          <AppModal componentToLoad={<Processing></Processing>} ></AppModal>
 	) :null}

@@ -170,6 +170,25 @@ def get_tasks():
 
     # return data['lastUpdatedOn'] == date_to_check
     
+@app.route('/getDataInBetweenDates', methods = ['GET'])
+@login_required
+def get_data_in_between_dates():
+    filename = "currentstocktable.csv"
+    from_date = datetime.strptime(request.args.get("date_from"), "%m/%d/%Y")
+    to_date = datetime.strptime(request.args.get("date_to"), "%m/%d/%Y")
+    
+    
+    def filter_in_between_dates(every_date):
+        everyDate_date = datetime.strptime(every_date['lastUpdatedOn'], "%m/%d/%Y")
+        return everyDate_date>=from_date and everyDate_date<=to_date
+    
+    with open(filename, newline= "") as file:
+        readData = [row for row in csv.DictReader(file)]
+        extracted_list = list(filter(filter_in_between_dates,readData))
+        return jsonify(extracted_list)
+            
+    
+    
 
 
 @app.route('/getDataByDate', methods = ['GET'])
@@ -177,106 +196,37 @@ def get_tasks():
 def get_data_by_date():
     filename = "currentstocktable.csv"
     list_of_items = session['list_of_items_in_stock']
-    # print('request request {}'.format(request.args.get("date_to_check")))
     date_to_check = request.args.get("date_to_check")
     firstItemAddedOn=session['firstItemAddedOn']
-    # print(" list_of_items list_of_items {}".format(list_of_items))
     dateToCheck_date = datetime.strptime(date_to_check, "%m/%d/%Y")
     resultedData=[]
     
-    # m1, d1, y1 = [int(x) for x in date_to_check.split('/')]
-    # dateToCheck_date = date(y1, m1, d1)
     def filter_date(every_date):
-        
-        # m2, d2, y2 = [int(x) for x in every_date['lastUpdatedOn'].split('/')]
-        # everyDate_date = date(y2, m2, d2)
-        # everyDate_date = datetime.strptime(every_date['lastUpdatedOn'], '%m/%d/%Y')
-        # everyDate_date = datetime.strptime(every_date['lastUpdatedOn'][:-3], '%m-%d-%y_%H:%M:%S.%f')
         everyDate_date = datetime.strptime(every_date['lastUpdatedOn'], "%m/%d/%Y")
         return everyDate_date<=dateToCheck_date
 
     with open(filename, newline= "") as file:
         readData = [row for row in csv.DictReader(file)]
         extracted_list = list(filter(filter_date,readData))
-        # extracted_list = list(readData, key=lambda d: )
-        # m1, d1, y1 = [int(x) for x in date_to_check.split('/')]
-        # date.today().strftime('%m/%d/%Y')
-        # m2, d2, y2 = [int(x) for x in firstItemAddedOn.split('/')]
-        # firstDate_date = datetime.strptime(firstItemAddedOn, '%m/%d/%Y')
-        # firstDate_date = datetime.strptime(firstItemAddedOn, '%m/%d/%Y')
-        # dateToCheck_date = date(y1, m1, d1)
-        # firstDate_date = date(y2, m2, d2)
-        
-        # firstDate_date = datetime.strptime(firstItemAddedOn, '%m-%d-%y_%H:%M:%S.%f')
         firstDate_date = datetime.strptime(firstItemAddedOn, "%m/%d/%Y")
+        print("extracted_list single date {} {}".format(extracted_list,dateToCheck_date>=firstDate_date))
         
         if len(extracted_list) != 0 and dateToCheck_date>=firstDate_date:
             resu = max(extracted_list, key=lambda d: int(d['s_no']))
             max_s_no = int(resu['s_no'])
+            print("max_s_no {} len(list_of_items) {}".format(max_s_no,len(list_of_items)))
             while len(list_of_items)!=0 and max_s_no!=0:
                 for moreData in readData:
                     if any(d['item_name'] == moreData['item_name'] for d in list_of_items) and int(moreData['s_no'])==max_s_no and moreData['action']!="reduced":
                         resultedData.append(moreData)
-                        # max_s_no-=1
                     elif any(d['item_name'] == moreData['item_name'] for d in list_of_items) and int(moreData['s_no'])==max_s_no and moreData['action']=="reduced":
                         list_of_items[:] = [d for d in list_of_items if d.get('item_name') != moreData['item_name']]
                         resultedData.append(moreData)
                 max_s_no-=1
-        # for data in readData:
-        #     data['']
-        # max_sn_no = 
-        # for data in readData:
-        #     getMaxSNoOnDate()
     return jsonify(resultedData)
 
 
-@app.route('/updateCurrentStockTable', methods = ['PUT'])
-@login_required
-def updatecurrentstocktable():
-    filename = "currentstocktable.csv"
-    updateCurrentQty=0
-    updatePerUnitPrice = 0
-    prevSno = 0
-    tempDataDict = {}
-    with open(filename, newline= "") as file:
-        readData = [row for row in csv.DictReader(file)]
-        for data in readData:
-            for dataFromReq in request.json['itemsToSupply']:
-                if data['item_id']==dataFromReq['item_id'] and data['item_name']==dataFromReq['item_name'] and data['is_last_updated']=="true":
-                    prevSno = int(data['s_no'])
-                    data['lastUpdatedOn'] = date.today().strftime('%m/%d/%Y')
-                    tempDataDict = data
-                    if data['action']!="reduced":
-                        while tempDataDict['action']!="reduced" and tempDataDict['item_id']==dataFromReq['item_id'] and tempDataDict['item_name']==dataFromReq['item_name'] and tempDataDict['s_no']!='1' and tempDataDict['item_per_unit_price']!='0' and tempDataDict['lastUpdatedQty']!='0':
-                            for tempData in readData:
-                                if tempData['s_no'] == str(prevSno) and tempData['item_id']==dataFromReq['item_id'] and tempData['item_name']==dataFromReq['item_name']:
-                                    # updateCurrentQty = float(tempData['curr_qty_in_stock'])-float(dataFromReq['amountToSupply'])
-                                    if tempData['action']=="reduced":
-                                        updatePerUnitPrice += float(tempData['item_per_unit_price'])*float(tempData['curr_qty_in_stock'])
-                                    else:
-                                        updatePerUnitPrice += float(tempData['item_per_unit_price'])*float(tempData['lastUpdatedQty'])
-                                    # print("check=========>updatePerUnitPrice {} prevSno {}".format(updatePerUnitPrice,prevSno))
-                                    tempDataDict = tempData
-                            # print(" tempDataDict['s_no'] {} tempData['s_no'] {}".format(tempDataDict['s_no'],tempData['s_no']))
-                            prevSno-=1
-                        # if tempDataDict['action']=="reduced" and tempDataDict['item_id']==dataFromReq['item_id'] and tempDataDict['item_name']==dataFromReq['item_name']:
-                        #     updatePerUnitPrice += float(tempDataDict['item_per_unit_price'])*float(tempDataDict['curr_qty_in_stock'])
-                        #     print("check========found reduced")
-                        updatePerUnitPrice=updatePerUnitPrice/float(data['curr_qty_in_stock'])
-                        data['item_per_unit_price'] = round(updatePerUnitPrice,0)
-                    data['lastUpdatedQty']=float(data['curr_qty_in_stock'])-float(dataFromReq['amountToSupply'])
-                    data['curr_qty_in_stock'] = float(data['curr_qty_in_stock'])-float(dataFromReq['amountToSupply'])
-                    # dataFromReq['amountToSupply']
-                    data['action']="reduced"
-                        
-                    # dataFromReq['lastUpdatedOn']
-    readHeader = readData[0].keys()
-    writer(readHeader, readData, filename, "update")
-    file.close()
-    return get_task(), 201
-
-
-def updateIt(dataImp,dataToBeAppended):
+def updateIt(dataToBeAppended):
     filename = "currentstocktable.csv"
     headerForCurrentStock = ("s_no","item_id","item_name","item_unit","item_per_unit_price","lastUpdatedQty","action","lastUpdatedOn","curr_qty_in_stock","is_last_updated")
     files = open(filename, "r")
@@ -293,13 +243,80 @@ def updateIt(dataImp,dataToBeAppended):
         idForCurrentStock+=1
     return  get_task(), 201
 
+
+@app.route('/updateCurrentStockTable', methods = ['PUT'])
+@login_required
+def updatecurrentstocktable():
+    filename = "currentstocktable.csv"
+    dataToBeAppended = []
+    updateCurrentQty=0
+    updatePerUnitPrice = 0
+    prevSno = 0
+    tempDataDict = {}
+    files = open(filename, "r")
+    idForCurrentStock=0
+    line=files.readlines()
+    idForCurrentStock=len(line)
+    files.seek(0)
+    files.close()
+    with open(filename, newline= "") as file:
+        readData = [row for row in csv.DictReader(file)]
+        for data in readData:
+            for dataFromReq in request.json['itemsToSupply']:
+                if data['item_id']==dataFromReq['item_id'] and data['item_name']==dataFromReq['item_name'] and data['is_last_updated']=="true":
+                    prevSno = int(data['s_no'])
+                    data['lastUpdatedOn'] = date.today().strftime('%m/%d/%Y')
+                    tempDataDict = data
+                    if data['action']!="reduced":
+                        while tempDataDict['action']!="reduced" and tempDataDict['item_id']==dataFromReq['item_id'] and tempDataDict['item_name']==dataFromReq['item_name'] and tempDataDict['s_no']!='1' and tempDataDict['item_per_unit_price']!='0' and tempDataDict['lastUpdatedQty']!='0':
+                            for tempData in readData:
+                                if tempData['s_no'] == str(prevSno) and tempData['item_id']==dataFromReq['item_id'] and tempData['item_name']==dataFromReq['item_name']:
+                                    if tempData['action']=="reduced":
+                                        updatePerUnitPrice += float(tempData['item_per_unit_price'])*float(tempData['curr_qty_in_stock'])
+                                    else:
+                                        updatePerUnitPrice += float(tempData['item_per_unit_price'])*float(tempData['lastUpdatedQty'])
+                                    tempDataDict = tempData
+                            prevSno-=1
+                        updatePerUnitPrice=updatePerUnitPrice/float(data['curr_qty_in_stock'])
+                        data['item_per_unit_price'] = round(updatePerUnitPrice,0)
+                    else:
+                        updatePerUnitPrice = float(data['item_per_unit_price'])
+                        
+                    # data['lastUpdatedQty']=float(data['curr_qty_in_stock'])-float(dataFromReq['amountToSupply'])
+                    # data['curr_qty_in_stock'] = float(data['curr_qty_in_stock'])-float(dataFromReq['amountToSupply'])
+                    data['is_last_updated']="false"
+                    dataForCurrentStock = {
+                    's_no':  idForCurrentStock,
+                    'item_id': dataFromReq['item_id'],
+                    'item_name': dataFromReq['item_name'],
+                    'item_unit': tempDataDict['item_unit'],
+                    'item_per_unit_price': round(updatePerUnitPrice,0),
+                    'lastUpdatedQty': float(dataFromReq['amountToSupply']),
+                    'action': "reduced",
+                    'lastUpdatedOn': str(date.today().strftime('%m/%d/%Y')),
+                    'curr_qty_in_stock': float(data['curr_qty_in_stock'])-float(dataFromReq['amountToSupply']),
+                    'is_last_updated':"true"
+    }
+                        
+                    dataToBeAppended.append(dataForCurrentStock)
+                    # dataFromReq['lastUpdatedOn']
+    readHeader = readData[0].keys()
+    writer(readHeader, readData, filename, "update")
+    
+    # writer(readHeader, dataForCurrentStock, filename, "append")
+    file.close()
+    return updateIt(dataToBeAppended)
+
+
+
+
 @app.route('/addInCurrentStockTable', methods = ['PUT'])
 @login_required
 def addInCurrentStockTable():
     headerForCurrentStock = ("s_no","item_id","item_name","item_unit","item_per_unit_price","lastUpdatedQty","action","lastUpdatedOn","curr_qty_in_stock","is_last_updated")
   
     filename = "currentstocktable.csv"
-    dataImp=request.json['items_to_add']
+    # dataImp=request.json['items_to_add']
     # dataToBeAppended = defaultdict(object)
     dataToBeAppended = []
     files = open(filename, "r")
@@ -336,7 +353,7 @@ def addInCurrentStockTable():
                         # data['is_last_updated']=True
     file.close()
     
-    return updateIt(dataImp,dataToBeAppended)
+    return updateIt(dataToBeAppended)
 
 
 def get_filter_by_last_updated_status(data):

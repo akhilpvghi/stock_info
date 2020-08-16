@@ -146,7 +146,7 @@ function Table({ columns, data }) {
     const[columns,setColumns] =  useState([]);
     const [showModal, setShowModal] = useState({status: ""});
     const [headerMessage, setHeaderMessage] = useState("Add Item In Stock");
-    let optionsForUnit=[{ value: "Kg", label: "Kg" },{ value: "Ltr", label: "Ltr" }];
+    let optionsForUnit=[{ value: "Kg", label: "Kg" },{ value: "Ltr", label: "Ltr" },{ value: "gram", label: "gram" }];
     const [userInput, setUserInput] = useReducer(
         (state, newState) => ({ ...state, ...newState }),
         { item_name : "",
